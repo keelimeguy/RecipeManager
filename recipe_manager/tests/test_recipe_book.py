@@ -48,6 +48,20 @@ class RecipeBookTestCase(unittest.TestCase):
             [(1.0, u'Test Unit 1', u'Test Ingredient 1'), (2.0, u'Test Unit 2', u'Test Ingredient 2')]])
         book.close()
 
+    def test_size(self):
+        book = RecipeBook(self.database)
+        self.assertEqual(str(book), "")
+        self.assertEqual(book.size(), 0)
+        r_id = book.add("Test Name", "Test Description", "Test Instructions", 15,
+            "Test Notes", [(1, "Test Unit 1", "Test Ingredient 1")])
+        self.assertEqual(book.size(), 1)
+        r_id = book.add("Test Name 2", "Test Description", "Test Instructions", 15,
+            "Test Notes", [(1, "Test Unit 2", "Test Ingredient 2")])
+        self.assertEqual(book.size(), 2)
+        book.purge()
+        self.assertEqual(book.size(), 0)
+        book.close()
+
     def test_save(self):
         book = RecipeBook(self.database)
         self.assertEqual(str(book), "")

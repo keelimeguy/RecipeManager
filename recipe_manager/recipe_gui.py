@@ -4,7 +4,7 @@ from Tkinter import *
 
 from recipe_book import RecipeBook
 
-class CreateRecipeView(Frame):
+class RecipeCreationView(Frame):
     def __init__(self, master):
         self.master = master
         master.maxsize(375,323)
@@ -52,6 +52,7 @@ class CreateRecipeView(Frame):
         self.ingr_text.bind('<Return>', self.on_text_tab)
         self.ingr_add_button = Button(master, text="+", command=self.add_ingr).grid(row=6, column=11, sticky=EW)
         self.ingr_add_button = Button(master, text="-", command=self.rem_ingr).grid(row=6, column=12, sticky=EW)
+        self.ingr_dict = {}
 
         self.inst_label = Label(master, text="Instructions:").grid(row=7, column=0, columnspan=2, sticky=E)
         self.inst_scrollbar = Scrollbar(master, orient=VERTICAL)
@@ -95,14 +96,24 @@ class CreateRecipeView(Frame):
     def add_ingr(self):
         self.selected = False
         self.ingr_amount.focus()
+        self.ingr_amount.config(bg="white")
+        self.ingr_text.config(bg="white")
+
         try:
             amount = float(self.ingr_amount.get("1.0", END))
         except ValueError as e:
             print(e)
             self.ingr_amount.config(bg="red")
             return
-        self.ingr_amount.config(bg="white")
-        self.ingr_list.insert(END, (amount, self.ingr_unit.get("1.0", END), self.ingr_text.get("1.0", END)))
+
+        name = self.ingr_text.get("1.0", END).strip()
+        if name in self.ingr_dict:
+            self.ingr_text.config(bg="red")
+            self.ingr_text.focus()
+            return
+
+        self.ingr_dict[name] = amount
+        self.ingr_list.insert(END, (amount, self.ingr_unit.get("1.0", END).strip(), name))
         self.ingr_text.delete("1.0", END)
         self.ingr_amount.delete("1.0", END)
         self.ingr_unit.delete("1.0", END)
@@ -110,12 +121,17 @@ class CreateRecipeView(Frame):
     def rem_ingr(self, event=None):
         sel = self.ingr_list.curselection()
         for i in sel:
+            del self.ingr_dict[self.ingr_list.get(i)]
             self.ingr_list.delete(i)
 
     def save_recipe(self):
-        pass
-
+        book = RecipeBook("recipe_data.db")
+        book.add(self.name_text.get("1.0", END).strip(), self.desc_text.get("1.0", END).strip(), self.inst_text.get("1.0", END).strip(),
+            1.0, None, [(ingr[0], ingr[1].strip(), ingr[2].strip()) for ingr in self.ingr_list.get(0, END)])
+        book.save()
+        print(book)
+        book.close()
 
 root = Tk()
-my_gui = CreateRecipeView(root)
+my_gui = RecipeCreationView(root)
 root.mainloop()

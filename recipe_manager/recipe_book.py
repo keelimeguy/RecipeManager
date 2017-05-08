@@ -72,7 +72,8 @@ class RecipeBook:
             amount REAL,
             CONSTRAINT fk_recipe FOREIGN KEY(recipe_id) REFERENCES Recipe(id),
             CONSTRAINT fk_ingredient FOREIGN KEY(ingredient_id) REFERENCES Ingredient(id),
-            CONSTRAINT fk_measure FOREIGN KEY(measure_id) REFERENCES Measure(id));"""
+            CONSTRAINT fk_measure FOREIGN KEY(measure_id) REFERENCES Measure(id)
+            UNIQUE(recipe_id, ingredient_id));"""
         )
 
     def add_measure(self, unit):
@@ -103,7 +104,7 @@ class RecipeBook:
         return self.cursor.fetchone()[0]
 
     def add_recipe_ingredient(self, recipe_id, ingredient_id, measure_id, amount):
-        self.cursor.execute("""INSERT INTO RecipeIngredient (recipe_id, ingredient_id, measure_id, amount)
+        self.cursor.execute("""INSERT OR IGNORE INTO RecipeIngredient (recipe_id, ingredient_id, measure_id, amount)
             VALUES (?, ?, ?, ?)""", (recipe_id, ingredient_id, measure_id, amount))
 
     def add(self, name, description, instructions, amount_yield, notes, ingredients):
@@ -139,6 +140,14 @@ class RecipeBook:
         recipe.append(ingredients)
 
         return recipe
+
+    def size(self):
+        self.cursor.execute("""
+            SELECT COUNT(*)
+            FROM Recipe""")
+        results = self.cursor.fetchall()
+        return results[0][0]
+
 
     def save(self):
         self.connection.commit()
