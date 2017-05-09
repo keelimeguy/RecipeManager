@@ -47,6 +47,8 @@ class RecipeBook:
             instructions VARCHAR(500),
             yield Integer,
             notes VARCHAR(100),
+            prep_time Real,
+            cook_time Real,
             UNIQUE(name));"""
         )
 
@@ -94,9 +96,9 @@ class RecipeBook:
             WHERE i.name = ?""", [ingredient])
         return self.cursor.fetchone()[0]
 
-    def add_recipe(self, name, description, instructions, amount_yield, notes):
-        self.cursor.execute("""INSERT OR IGNORE INTO Recipe (id, name, description, instructions, yield, notes)
-           VALUES (NULL, ?, ?, ?, ?, ?)""", (name, description, instructions, amount_yield, notes))
+    def add_recipe(self, name, description, instructions, amount_yield, notes, prep_time, cook_time):
+        self.cursor.execute("""INSERT OR IGNORE INTO Recipe (id, name, description, instructions, yield, notes, prep_time, cook_time)
+           VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)""", (name, description, instructions, amount_yield, notes, prep_time, cook_time))
         self.cursor.execute("""
             SELECT r.id
             FROM Recipe r
@@ -107,19 +109,20 @@ class RecipeBook:
         self.cursor.execute("""INSERT OR IGNORE INTO RecipeIngredient (recipe_id, ingredient_id, measure_id, amount)
             VALUES (?, ?, ?, ?)""", (recipe_id, ingredient_id, measure_id, amount))
 
-    def add(self, name, description, instructions, amount_yield, notes, ingredients, force=False):
+    def add(self, name, description, instructions, amount_yield, notes, prep_time, cook_time, ingredients, force=False, r_id=None):
         if force:
-            self.cursor.execute("""
-                SELECT r.id
-                FROM Recipe r
-                WHERE r.name = ?
-                """, [name])
-            r_id = self.cursor.fetchone()
-            if r_id:
+            if r_id == None:
+                self.cursor.execute("""
+                    SELECT r.id
+                    FROM Recipe r
+                    WHERE r.name = ?
+                    """, [name])
+                r_id = self.cursor.fetchone()
+            if r_id != None:
                 r_id = r_id[0]
                 self.cursor.execute("""DELETE FROM Recipe WHERE name = ?""", [name])
                 self.cursor.execute("""DELETE FROM RecipeIngredient WHERE recipe_id = ?""", [r_id])
-        r_id = self.add_recipe(name, description, instructions, amount_yield, notes)
+        r_id = self.add_recipe(name, description, instructions, amount_yield, notes, prep_time, cook_time)
         for i in ingredients:
             i_id = self.add_ingredient(i[2])
             mu_id = self.add_measure(i[1])
@@ -152,6 +155,50 @@ class RecipeBook:
 
         return recipe
 
+    def delete(self, r_id):
+        if r_id:
+            self.cursor.execute("""DELETE FROM Recipe WHERE id = ?""", [r_id])
+            self.cursor.execute("""DELETE FROM RecipeIngredient WHERE recipe_id = ?""", [r_id])
+            self.save()
+
+    def select_recipe(self, index, id_list=None):
+        if id_list:
+            r_id = [(i, None) for i in id_list]
+        else:
+            self.cursor.execute("""
+                SELECT r.id
+                FROM Recipe r
+                """)
+            r_id = self.cursor.fetchall()
+            recipe = None
+        if r_id:
+            if len(r_id)>0:
+                if index >= len(r_id):
+                    index = 0
+                elif index < 0:
+                    index = len(r_id)-1
+            if len(r_id)>index:
+                r_id = r_id[index][0]
+                recipe = self.get(r_id)
+            else:
+                r_id = None
+        return recipe, r_id, index
+
+    def select_index(self, recipe_id, id_list=None):
+        if id_list:
+            r_id = [(i, None) for i in id_list]
+        else:
+            self.cursor.execute("""
+                SELECT r.id
+                FROM Recipe r
+                """)
+            r_id = self.cursor.fetchall()
+        if r_id:
+            for i in range(len(r_id)):
+                if r_id[i][0] == recipe_id:
+                    return i
+        return None
+
     def size(self):
         self.cursor.execute("""
             SELECT COUNT(*)
@@ -159,6 +206,45 @@ class RecipeBook:
         results = self.cursor.fetchall()
         return results[0][0]
 
+    def renumber(self):
+        self.cursor.execute("""
+        CREATE TABLE Recipe_ (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(25),
+            description VARCHAR(50),
+            instructions VARCHAR(500),
+            yield Integer,
+            notes VARCHAR(100),
+            prep_time Integer,
+            cook_time Integer,
+            UNIQUE(name));"""
+        )
+        self.cursor.execute("""
+            ALTER TABLE Recipe
+            RENAME TO Recipe_clone""")
+        self.cursor.execute("""
+            ALTER TABLE Recipe_
+            RENAME TO Recipe""")
+        self.cursor.execute("""
+            SELECT *
+            FROM Recipe_clone""")
+        results = self.cursor.fetchall()
+        if results:
+            for r in results:
+                result = self.cursor.execute("""
+                    SELECT ri.amount AS 'Amount',
+                    mu.name AS 'Unit of Measure',
+                    i.name AS 'Ingredient'
+                    FROM Recipe_clone r
+                    JOIN RecipeIngredient ri on r.id = ri.recipe_id
+                    JOIN Ingredient i on i.id = ri.ingredient_id
+                    LEFT OUTER JOIN Measure mu on mu.id = measure_id
+                    WHERE r.id = ?""", [r[0]])
+                ingredients = []
+                for i in result:
+                    ingredients.append(i)
+                self.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, True, [r[0]])
+        self.cursor.execute("DROP TABLE Recipe_clone")
 
     def save(self):
         self.connection.commit()

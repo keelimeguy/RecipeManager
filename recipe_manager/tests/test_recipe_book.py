@@ -24,7 +24,9 @@ class RecipeBookTestCase(unittest.TestCase):
             (2, u'description', u'VARCHAR(50)', 0, None, 0),
             (3, u'instructions', u'VARCHAR(500)', 0, None, 0),
             (4, u'yield', u'Integer', 0, None, 0),
-            (5, u'notes', u'VARCHAR(100)', 0, None, 0)])
+            (5, u'notes', u'VARCHAR(100)', 0, None, 0)
+            (6, u'prep_time', u'REAL', 0, None, 0)
+            (7, u'cook_time', u'REAL', 0, None, 0)])
         self.assertEqual(table_info(book, "Ingredient"),
             [(0, u'id', u'INTEGER', 0, None, 1),
             (1, u'name', u'VARCHAR(50)', 0, None, 0)])
@@ -41,10 +43,10 @@ class RecipeBookTestCase(unittest.TestCase):
     def test_add(self):
         book = RecipeBook(self.database)
         self.assertEqual(str(book), "")
-        r_id = book.add("Test Name", "Test Description", "Test Instructions", 15, "Test Notes",
+        r_id = book.add("Test Name", "Test Description", "Test Instructions", 15, "Test Notes", 5, 4,
             [(1, "Test Unit 1", "Test Ingredient 1"), (2, "Test Unit 2", "Test Ingredient 2")])
         self.assertEqual(book.get(r_id),
-            [(1, u'Test Name', u'Test Description', u'Test Instructions', 15, u'Test Notes'),
+            [(1, u'Test Name', u'Test Description', u'Test Instructions', 15, u'Test Notes', 5, 4),
             [(1.0, u'Test Unit 1', u'Test Ingredient 1'), (2.0, u'Test Unit 2', u'Test Ingredient 2')]])
         book.close()
 
@@ -53,10 +55,10 @@ class RecipeBookTestCase(unittest.TestCase):
         self.assertEqual(str(book), "")
         self.assertEqual(book.size(), 0)
         r_id = book.add("Test Name", "Test Description", "Test Instructions", 15,
-            "Test Notes", [(1, "Test Unit 1", "Test Ingredient 1")])
+            "Test Notes", 5, 4, [(1, "Test Unit 1", "Test Ingredient 1")])
         self.assertEqual(book.size(), 1)
         r_id = book.add("Test Name 2", "Test Description", "Test Instructions", 15,
-            "Test Notes", [(1, "Test Unit 2", "Test Ingredient 2")])
+            "Test Notes", 5, 4, [(1, "Test Unit 2", "Test Ingredient 2")])
         self.assertEqual(book.size(), 2)
         book.purge()
         self.assertEqual(book.size(), 0)
@@ -66,7 +68,7 @@ class RecipeBookTestCase(unittest.TestCase):
         book = RecipeBook(self.database)
         self.assertEqual(str(book), "")
         r_id = book.add("Test Name", "Test Description", "Test Instructions", 15,
-            "Test Notes", [(1, "Test Unit 1", "Test Ingredient 1")])
+            "Test Notes", 5, 4, [(1, "Test Unit 1", "Test Ingredient 1")])
         self.assertEqual(str(book),
             "(u'Test Name', 1.0, u'Test Unit 1', u'Test Ingredient 1')")
         book.save()
@@ -80,7 +82,7 @@ class RecipeBookTestCase(unittest.TestCase):
         book = RecipeBook(self.database)
         self.assertEqual(str(book), "")
         r_id = book.add("Test Name", "Test Description", "Test Instructions", 15,
-            "Test Notes", [(1, "Test Unit 1", "Test Ingredient 1")])
+            "Test Notes", 5, 4, [(1, "Test Unit 1", "Test Ingredient 1")])
         self.assertEqual(str(book),
             "(u'Test Name', 1.0, u'Test Unit 1', u'Test Ingredient 1')")
         book.purge()
