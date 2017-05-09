@@ -47,8 +47,8 @@ class RecipeBook:
             instructions VARCHAR(500),
             yield Integer,
             notes VARCHAR(100),
-            prep_time Real,
-            cook_time Real,
+            prep_time REAL,
+            cook_time REAL,
             UNIQUE(name));"""
         )
 

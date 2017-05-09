@@ -157,6 +157,7 @@ class RecipeViewWindow(Frame):
         book = RecipeBook(self.database)
         recipe, r_id, self.index = book.select_recipe(self.index, self.id_list)
         book.close()
+        old_id = r_id
         w = RecipeCreationWindow(Toplevel(self), self.database, self.root, recipe)
         self.wait_window(w)
         if w.final != None:
@@ -167,6 +168,7 @@ class RecipeViewWindow(Frame):
                 WHERE r.name = ?
                 """, [w.final])
             r_id = book.cursor.fetchone()[0]
+            self.id_list = [r_id if x==old_id else x for x in self.id_list]
             next_index = book.select_index(r_id, self.id_list)
             book.close()
             self.index =  next_index if next_index else self.index

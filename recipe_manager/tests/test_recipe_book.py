@@ -24,8 +24,8 @@ class RecipeBookTestCase(unittest.TestCase):
             (2, u'description', u'VARCHAR(50)', 0, None, 0),
             (3, u'instructions', u'VARCHAR(500)', 0, None, 0),
             (4, u'yield', u'Integer', 0, None, 0),
-            (5, u'notes', u'VARCHAR(100)', 0, None, 0)
-            (6, u'prep_time', u'REAL', 0, None, 0)
+            (5, u'notes', u'VARCHAR(100)', 0, None, 0),
+            (6, u'prep_time', u'REAL', 0, None, 0),
             (7, u'cook_time', u'REAL', 0, None, 0)])
         self.assertEqual(table_info(book, "Ingredient"),
             [(0, u'id', u'INTEGER', 0, None, 1),
