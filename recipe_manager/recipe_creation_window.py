@@ -1,7 +1,7 @@
 from Tkinter import *
 
-from recipe_book import RecipeBook
-from modal_window import ModalWindow
+from recipe_manager.recipe_book import RecipeBook
+from recipe_manager.modal_window import ModalWindow
 
 class RecipeCreationWindow(Frame):
     def __init__(self, master, database, root, recipe=None):

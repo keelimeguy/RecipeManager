@@ -3,8 +3,8 @@
 from Tkinter import *
 import argparse
 
-from recipe_creation_window import RecipeCreationWindow
-from recipe_book import RecipeBook
+from recipe_manager.recipe_creation_window import RecipeCreationWindow
+from recipe_manager.recipe_book import RecipeBook
 
 class RecipeManagerWindow(Frame):
     def __init__(self, root, database):
@@ -76,6 +76,7 @@ class RecipeManagerWindow(Frame):
             FROM Recipe r
             """)
         r_id = book.cursor.fetchall()
+        recipe = None
         if r_id:
             if len(r_id)>0:
                 if index >= len(r_id):
@@ -99,7 +100,6 @@ class RecipeManagerWindow(Frame):
         r_id = book.cursor.fetchall()
         if r_id:
             for i in range(len(r_id)):
-                print(r_id[i], recipe_id)
                 if r_id[i][0] == recipe_id:
                     return i
         return None
@@ -164,7 +164,7 @@ class RecipeManagerWindow(Frame):
             recipe, r_id, self.index = self.select_recipe(self.index)
         w = RecipeCreationWindow(Toplevel(self), self.database, self.root, recipe)
         self.wait_window(w)
-        if w.final:
+        if w.final != None:
             book = RecipeBook(self.database)
             book.cursor.execute("""
                 SELECT r.id
@@ -174,7 +174,6 @@ class RecipeManagerWindow(Frame):
             r_id = book.cursor.fetchone()[0]
             book.close()
             next_index = self.select_index(r_id)
-            print(next_index)
             self.index =  next_index if next_index else self.index
             self.populate()
 
