@@ -21,9 +21,12 @@ if __name__ == '__main__':
         book.purge()
         print("\nDatabase has been reset: {}\n".format(args.database))
 
-    for i in range(1, book.size()+1):
-        recipe = book.get(i)
-        print(recipe)
+    book.cursor.execute("""
+        SELECT r.id
+        FROM Recipe r""")
+    results = book.cursor.fetchall()
+    for r in results:
+        print(book.get(r[0]))
         print
 
     book.cursor.execute("SELECT * FROM Recipe")

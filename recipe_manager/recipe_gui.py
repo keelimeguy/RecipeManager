@@ -1,137 +1,192 @@
 #!/usr/bin/env python
 
 from Tkinter import *
+import argparse
 
+from recipe_creation_window import RecipeCreationWindow
 from recipe_book import RecipeBook
 
-class RecipeCreationView(Frame):
-    def __init__(self, master):
-        self.master = master
-        master.maxsize(375,323)
-        master.title("Create Recipe")
-        master.grid_rowconfigure(1, weight=1)
-        master.grid_columnconfigure(1, weight=1)
+class RecipeManagerWindow(Frame):
+    def __init__(self, root, database):
+        Frame.__init__(self, root)
+        self.root = root
+        self.root.title("Recipe Manager")
+        self.root.maxsize(423,607)
+        self.canvas = Canvas(root, borderwidth=0, background="#ffffff", width=400, height=560)
+        self.frame = Frame(self.canvas, background="#ffffff")
+        self.vsb = Scrollbar(root, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.vsb.set)
+        self.hsb = Scrollbar(root, orient="horizontal", command=self.canvas.xview)
+        self.canvas.configure(xscrollcommand=self.hsb.set)
 
-        self.selected = False
+        self.button_left = Button(root, text="<", command=self.shift_left)
+        self.button_right = Button(root, text=">", command=self.shift_right)
+        self.button_left.grid(row=0, column=0, sticky=W)
+        self.button_right.grid(row=0, column=11, sticky=E)
 
-        self.name_label = Label(master, text="Name:").grid(row=0, column=0, columnspan=2, sticky=E)
-        self.name_text = Text(master, height=1, width=32)
-        self.name_text.grid(row=0, column=2, columnspan=9, sticky=NSEW)
-        self.name_text.bind('<Tab>', self.on_text_tab)
-        self.name_text.bind('<Return>', self.on_text_tab)
+        self.button_edit = Button(root, text="Edit Recipe", command=self.edit_recipe)
+        self.button_edit.grid(row=0, column=4, sticky=EW)
 
-        self.desc_label = Label(master, text="Description:").grid(row=2, column=0, columnspan=2, sticky=E)
-        self.desc_scrollbar = Scrollbar(master, orient=VERTICAL)
-        self.desc_scrollbar.grid(row=3, column=11, columnspan=1, sticky=W)
-        self.desc_text = Text(master, undo=True, height=2, width=32)
-        self.desc_text.grid(row=3, column=2, columnspan=9, sticky=NSEW)
-        self.desc_text.bind('<Tab>', self.on_text_tab)
-        self.desc_text.config(yscrollcommand=self.desc_scrollbar.set)
-        self.desc_scrollbar.config(command=self.desc_text.yview)
+        self.button_create = Button(root, text="New Recipe", command=self.create_recipe)
+        self.button_create.grid(row=0, column=5, sticky=EW)
 
-        self.ingr_label = Label(master, text="Ingredients:").grid(row=4, column=0, columnspan=2, sticky=E)
-        self.ingr_scrollbar = Scrollbar(master, orient=VERTICAL)
-        self.ingr_scrollbar.grid(row=5, column=11, columnspan=1, sticky=W)
-        self.ingr_list = Listbox(master, height=4, width=32)
-        self.ingr_list.grid(row=5, column=2, columnspan=9, sticky=NSEW)
-        self.ingr_list.config(yscrollcommand=self.ingr_scrollbar.set)
-        self.ingr_list.bind('<BackSpace>', self.rem_ingr)
-        self.ingr_list.bind('<<ListboxSelect>>', self.on_select)
-        self.ingr_scrollbar.config(command=self.ingr_list.yview)
-        self.ingr_amount = Text(master, height=1, width=4)
-        self.ingr_amount.grid(row=6, column=2, sticky=E)
-        self.ingr_amount.bind('<Tab>', self.on_text_tab)
-        self.ingr_amount.bind('<Return>', self.on_text_tab)
-        self.ingr_unit = Text(master, height=1, width=8)
-        self.ingr_unit.grid(row=6, column=3, columnspan=2, sticky=EW)
-        self.ingr_unit.bind('<Tab>', self.on_text_tab)
-        self.ingr_unit.bind('<Return>', self.on_text_tab)
-        self.ingr_text = Text(master, height=1, width=20)
-        self.ingr_text.grid(row=6, column=5, columnspan=5, sticky=EW)
-        self.ingr_text.bind('<Tab>', self.on_text_tab)
-        self.ingr_text.bind('<Return>', self.on_text_tab)
-        self.ingr_add_button = Button(master, text="+", command=self.add_ingr).grid(row=6, column=11, sticky=EW)
-        self.ingr_add_button = Button(master, text="-", command=self.rem_ingr).grid(row=6, column=12, sticky=EW)
-        self.ingr_dict = {}
+        self.database = database
 
-        self.inst_label = Label(master, text="Instructions:").grid(row=7, column=0, columnspan=2, sticky=E)
-        self.inst_scrollbar = Scrollbar(master, orient=VERTICAL)
-        self.inst_scrollbar.grid(row=8, column=11, columnspan=1, sticky=W)
-        self.inst_text = Text(master, undo=True, height=4, width=32)
-        self.inst_text.grid(row=8, column=2, columnspan=9, sticky=NSEW)
-        self.inst_text.config(yscrollcommand=self.inst_scrollbar.set)
-        self.inst_text.bind('<Tab>', self.on_text_tab)
-        self.inst_scrollbar.config(command=self.inst_text.yview)
+        self.vsb.grid(row=1, column=11, sticky=NSEW)
+        self.hsb.grid(row=2, column=0, columnspan=10, sticky=NSEW)
+        self.canvas.grid(row=1, column=0, columnspan=10, sticky=NSEW)
+        self.frame_id = self.canvas.create_window((4,4), window=self.frame, anchor=N+W,
+                                  tags="self.frame")
 
-        self.save_button = Button(master, text="Save", command=self.save_recipe)
-        self.save_button.grid(row=9, column=2, columnspan=9, sticky=EW)
-        self.back_button = Button(master, text="Back", command=master.quit)
-        self.back_button.grid(row=9, column=11, columnspan=2, sticky=EW)
+        self.frame.bind("<Configure>", self.onFrameConfigure)
 
-    def _focusNext(self, widget):
-        '''Return the next widget in tab order'''
-        widget = self.master.call('tk_focusNext', widget._w)
-        if not widget: return None
-        return self.nametowidget(widget.string)
+        self.name_label = Label(self.frame, text="Name", bg="white", font=("Times", 18, "bold"))
+        self.name_label.grid(row=0, column=0, columnspan=6, sticky=W)
+        self.serv_label = Label(self.frame, text="Servings", bg="white", font=("Times", 10, ""))
+        self.serv_label.grid(row=1, column=0, columnspan=6, sticky=W)
+        self.desc_label = Label(self.frame, text="Description", bg="white", font=("Times", 12, "italic"))
+        self.desc_label.grid(row=2, column=0, columnspan=6, sticky=W)
+        self.blank_label_1 = Label(self.frame, text="", bg="white", height=1)
+        self.blank_label_1.grid(row=3, column=1, sticky=W)
+        self.ingr_label_title = Label(self.frame, text="Ingredients", bg="white", font=("Times", 12, "bold"))
+        self.ingr_label_title.grid(row=4, column=0, columnspan=3, sticky=W)
+        self.ingr_label_list = []
+        row = 5
+        self.ingr_label_list.append((Label(self.frame, text="Amount", bg="white", font=("Times", 10, "")),
+            Label(self.frame, text="Unit", bg="white", font=("Times", 10, "")),
+            Label(self.frame, text="Ingredient", bg="white", font=("Times", 10, ""))))
+        self.ingr_label_list[0][0].grid(row=row, column=0, sticky=W)
+        self.ingr_label_list[0][1].grid(row=row, column=1, sticky=W)
+        self.ingr_label_list[0][2].grid(row=row, column=2, columnspan=2, sticky=W)
+        row+=1
+        self.blank_label_2 = Label(self.frame, text="", bg="white", height=1)
+        self.blank_label_2.grid(row=row, column=1, sticky=W)
+        self.dir_label_title = Label(self.frame, text="Directions", bg="white", font=("Times", 12, "bold"))
+        self.dir_label_title.grid(row=row+1, column=0, columnspan=3, sticky=W)
+        self.dir_label = Label(self.frame, text="Direction", bg="white", font=("Times", 10, ""))
+        self.dir_label.grid(row=row+2, column=0, columnspan=3, sticky=W)
 
-    def on_text_tab(self, event):
-        '''Move focus to next widget'''
-        widget = event.widget
-        next = self._focusNext(widget)
-        next.focus()
-        return "break"
+        self.index = 0
+        self.populate()
 
-    def on_select(self, event):
-        if len(self.ingr_amount.get("1.0", END).strip()) == 0 and len(self.ingr_unit.get("1.0", END).strip()) == 0 and len(self.ingr_text.get("1.0", END).strip()) == 0 or self.selected:
-            self.selected = True
-            entry = self.ingr_list.get(self.ingr_list.curselection()[0])
-            self.ingr_text.delete("1.0", END)
-            self.ingr_amount.delete("1.0", END)
-            self.ingr_unit.delete("1.0", END)
-            self.ingr_amount.insert(END, str(entry[0]))
-            self.ingr_unit.insert(END, entry[1])
-            self.ingr_text.insert(END, entry[2])
-        return "break"
-
-    def add_ingr(self):
-        self.selected = False
-        self.ingr_amount.focus()
-        self.ingr_amount.config(bg="white")
-        self.ingr_text.config(bg="white")
-
-        try:
-            amount = float(self.ingr_amount.get("1.0", END))
-        except ValueError as e:
-            print(e)
-            self.ingr_amount.config(bg="red")
-            return
-
-        name = self.ingr_text.get("1.0", END).strip()
-        if name in self.ingr_dict:
-            self.ingr_text.config(bg="red")
-            self.ingr_text.focus()
-            return
-
-        self.ingr_dict[name] = amount
-        self.ingr_list.insert(END, (amount, self.ingr_unit.get("1.0", END).strip(), name))
-        self.ingr_text.delete("1.0", END)
-        self.ingr_amount.delete("1.0", END)
-        self.ingr_unit.delete("1.0", END)
-
-    def rem_ingr(self, event=None):
-        sel = self.ingr_list.curselection()
-        for i in sel:
-            del self.ingr_dict[self.ingr_list.get(i)]
-            self.ingr_list.delete(i)
-
-    def save_recipe(self):
-        book = RecipeBook("recipe_data.db")
-        book.add(self.name_text.get("1.0", END).strip(), self.desc_text.get("1.0", END).strip(), self.inst_text.get("1.0", END).strip(),
-            1.0, None, [(ingr[0], ingr[1].strip(), ingr[2].strip()) for ingr in self.ingr_list.get(0, END)])
-        book.save()
-        print(book)
+    def select_recipe(self, index):
+        book = RecipeBook(self.database)
+        book.cursor.execute("""
+            SELECT r.id
+            FROM Recipe r
+            """)
+        r_id = book.cursor.fetchall()
+        if r_id:
+            if len(r_id)>0:
+                if index >= len(r_id):
+                    index = 0
+                elif index < 0:
+                    index = len(r_id)-1
+            if len(r_id)>index:
+                r_id = r_id[index][0]
+                recipe = book.get(r_id)
+            else:
+                r_id = None
         book.close()
+        return recipe, r_id, index
 
-root = Tk()
-my_gui = RecipeCreationView(root)
-root.mainloop()
+    def select_index(self, recipe_id):
+        book = RecipeBook(self.database)
+        book.cursor.execute("""
+            SELECT r.id
+            FROM Recipe r
+            """)
+        r_id = book.cursor.fetchall()
+        if r_id:
+            for i in range(len(r_id)):
+                print(r_id[i], recipe_id)
+                if r_id[i][0] == recipe_id:
+                    return i
+        return None
+
+    def populate(self):
+        recipe, r_id, self.index = self.select_recipe(self.index)
+
+        name = recipe[0][1] if r_id else "<Name>"
+        description = recipe[0][2] if r_id else "<Description>"
+        directions = recipe[0][3] if r_id else "<Directions>"
+        servings = recipe[0][4] if r_id else "<Servings>"
+        ingredients = []
+        if r_id:
+            for i in recipe[1]:
+                ingredients.append(i)
+        else:
+            ingredients.append(("<Amount>", "<Unit>", "<Ingredient>"))
+
+        self.name_label.config(text=name)
+        self.serv_label.config(text="Serves {}".format(servings))
+        self.desc_label.config(text=description)
+        for i in self.ingr_label_list:
+            i[0].destroy()
+            i[1].destroy()
+            i[2].destroy()
+        row = 5
+        self.ingr_label_list = []
+        for i in ingredients:
+            self.ingr_label_list.append((Label(self.frame, text=i[0], bg="white", font=("Times", 10, "")),
+                Label(self.frame, text=i[1], bg="white", font=("Times", 10, "")),
+                Label(self.frame, text=i[2], bg="white", font=("Times", 10, ""))))
+            self.ingr_label_list[row-5][0].grid(row=row, column=0, sticky=W)
+            self.ingr_label_list[row-5][1].grid(row=row, column=1, sticky=W)
+            self.ingr_label_list[row-5][2].grid(row=row, column=2, columnspan=2, sticky=W)
+            row+=1
+        self.blank_label_2.destroy()
+        self.blank_label_2 = Label(self.frame, text="", bg="white", height=1)
+        self.blank_label_2.grid(row=row, column=1, sticky=W)
+        self.dir_label_title.destroy()
+        self.dir_label_title = Label(self.frame, text="Directions", bg="white", font=("Times", 12, "bold"))
+        self.dir_label_title.grid(row=row+1, column=0, columnspan=3, sticky=W)
+        self.dir_label.destroy()
+        self.dir_label = Label(self.frame, text=directions, bg="white", font=("Times", 10, ""), justify=LEFT)
+        self.dir_label.grid(row=row+2, column=0, columnspan=3, sticky=W)
+
+    def onFrameConfigure(self, event):
+        '''Reset the scroll region to encompass the inner frame'''
+        self.canvas.configure(scrollregion=self.canvas.bbox(ALL))
+
+    def shift_left(self):
+        self.index+=1
+        self.populate()
+
+    def shift_right(self):
+        self.index-=1
+        self.populate()
+
+    def edit_recipe(self, start_new=False):
+        if start_new:
+            recipe = None
+        else:
+            recipe, r_id, self.index = self.select_recipe(self.index)
+        w = RecipeCreationWindow(Toplevel(self), self.database, self.root, recipe)
+        self.wait_window(w)
+        if w.final:
+            book = RecipeBook(self.database)
+            book.cursor.execute("""
+                SELECT r.id
+                FROM Recipe r
+                WHERE r.name = ?
+                """, [w.final])
+            r_id = book.cursor.fetchone()[0]
+            book.close()
+            next_index = self.select_index(r_id)
+            print(next_index)
+            self.index =  next_index if next_index else self.index
+            self.populate()
+
+    def create_recipe(self):
+        self.edit_recipe(True)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Run the recipe manager GUI.')
+    parser.add_argument('-d', '--database', default="recipe_data.db",
+                        help='The database file you wish to use.')
+    args = parser.parse_args()
+    root = Tk()
+    my_gui = RecipeManagerWindow(root, args.database)
+    root.mainloop()

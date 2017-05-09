@@ -107,7 +107,18 @@ class RecipeBook:
         self.cursor.execute("""INSERT OR IGNORE INTO RecipeIngredient (recipe_id, ingredient_id, measure_id, amount)
             VALUES (?, ?, ?, ?)""", (recipe_id, ingredient_id, measure_id, amount))
 
-    def add(self, name, description, instructions, amount_yield, notes, ingredients):
+    def add(self, name, description, instructions, amount_yield, notes, ingredients, force=False):
+        if force:
+            self.cursor.execute("""
+                SELECT r.id
+                FROM Recipe r
+                WHERE r.name = ?
+                """, [name])
+            r_id = self.cursor.fetchone()
+            if r_id:
+                r_id = r_id[0]
+                self.cursor.execute("""DELETE FROM Recipe WHERE name = ?""", [name])
+                self.cursor.execute("""DELETE FROM RecipeIngredient WHERE recipe_id = ?""", [r_id])
         r_id = self.add_recipe(name, description, instructions, amount_yield, notes)
         for i in ingredients:
             i_id = self.add_ingredient(i[2])
