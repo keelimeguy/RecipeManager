@@ -185,4 +185,5 @@ class RecipeViewWindow(Frame):
         book = RecipeBook(self.database)
         book.delete(book.select_recipe(self.index, self.id_list)[1])
         book.close()
+        self.id_list.remove(self.id_list[self.index])
         self.populate()

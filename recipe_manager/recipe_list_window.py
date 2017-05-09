@@ -91,16 +91,18 @@ class RecipeListWindow(Frame):
         recipe = None
         w = RecipeCreationWindow(Toplevel(self), self.database, self.root, recipe)
         self.wait_window(w)
+        self.search = None
+        self.search_text.delete("1.0", END)
         self.populate()
 
     def search_recipe(self, event=None):
         search = self.search_text.get("1.0", END).strip()
         for cond in ["=", ">=", "<=", ">", "<"]:
-            for val in ["prep", "cook"]:
+            for val in ["prep", "cook", "serves"]:
                 if val+cond in search:
                     self.search = search
                     search = search.split(cond)[1]
-                    self.populate(("r.{}_time {} {}".format(val, cond, search)) if search else None)
+                    self.populate(("r.{} {} {}".format(val+"_time" if val!="serves" else "yield", cond, search)) if search else None)
                     return "break"
         self.search = search
         self.populate("r.name LIKE \'%"+search+"%\' OR r.notes LIKE \'%"+search+"%\'")
