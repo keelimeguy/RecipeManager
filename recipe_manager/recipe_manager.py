@@ -3,8 +3,8 @@
 from Tkinter import *
 import argparse
 
-from recipe_manager.recipe_creation_window import RecipeCreationWindow
-from recipe_manager.recipe_book import RecipeBook
+from recipe_creation_window import RecipeCreationWindow
+from recipe_book import RecipeBook
 
 class RecipeManagerWindow(Frame):
     def __init__(self, root, database):
