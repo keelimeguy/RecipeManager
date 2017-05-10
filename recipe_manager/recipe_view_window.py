@@ -1,8 +1,10 @@
 from Tkinter import *
 
-from recipe_book import RecipeBook
+# from recipe_book import RecipeBook
+# from modal_window import ModalWindow
+from recipe_manager.recipe_book import RecipeBook
+from recipe_manager.modal_window import ModalWindow
 from recipe_creation_window import RecipeCreationWindow
-from modal_window import ModalWindow
 
 class RecipeViewWindow(Frame):
     def __init__(self, root, database, manager, index=0, id_list=None, search=None):

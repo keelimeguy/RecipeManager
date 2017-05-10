@@ -2,8 +2,10 @@ import os
 import json
 from Tkinter import *
 
-from recipe_book import RecipeBook
-from recipe_creation_window import RecipeCreationWindow
+# from recipe_book import RecipeBook
+# from recipe_creation_window import RecipeCreationWindow
+from recipe_manager.recipe_book import RecipeBook
+from recipe_manager.recipe_creation_window import RecipeCreationWindow
 
 class RecipeListWindow(Frame):
     def __init__(self, root, database, manager, search=None):
@@ -51,9 +53,15 @@ class RecipeListWindow(Frame):
             self.populate()
 
     def load_json(self):
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(os.path.join(current_dir,"recipe_format.json"),"r") as f:
-            self.recipe_format = json.load(f)
+        # current_dir = os.path.dirname(os.path.realpath(__file__))
+        current_dir = os.getcwd()
+        if not os.path.isfile(os.path.join(current_dir,"recipe_format.json")):
+            with open(os.path.join(current_dir,"recipe_format.json"),"w") as f:
+                self.recipe_format = {"name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
+                json.dump(self.recipe_format, f)
+        else:
+            with open(os.path.join(current_dir,"recipe_format.json"),"r") as f:
+                self.recipe_format = json.load(f)
 
     def populate(self, search=None):
         self.recipe_list.delete(0, END)
