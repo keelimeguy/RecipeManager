@@ -3,12 +3,12 @@
 from Tkinter import *
 import argparse
 
-# from recipe_book import RecipeBook
-# from recipe_view_window import RecipeViewWindow
-# from recipe_list_window import RecipeListWindow
-from recipe_manager.recipe_book import RecipeBook
-from recipe_manager.recipe_view_window import RecipeViewWindow
-from recipe_manager.recipe_list_window import RecipeListWindow
+from recipe_book import RecipeBook
+from recipe_view_window import RecipeViewWindow
+from recipe_list_window import RecipeListWindow
+# from recipe_manager.recipe_book import RecipeBook
+# from recipe_manager.recipe_view_window import RecipeViewWindow
+# from recipe_manager.recipe_list_window import RecipeListWindow
 
 class RecipeManager():
     def __init__(self, root, database):

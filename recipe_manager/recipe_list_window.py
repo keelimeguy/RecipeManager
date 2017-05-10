@@ -2,10 +2,10 @@ import os
 import json
 from Tkinter import *
 
-# from recipe_book import RecipeBook
-# from recipe_creation_window import RecipeCreationWindow
-from recipe_manager.recipe_book import RecipeBook
-from recipe_manager.recipe_creation_window import RecipeCreationWindow
+from recipe_book import RecipeBook
+from recipe_creation_window import RecipeCreationWindow
+# from recipe_manager.recipe_book import RecipeBook
+# from recipe_manager.recipe_creation_window import RecipeCreationWindow
 
 class RecipeListWindow(Frame):
     def __init__(self, root, database, manager, search=None):

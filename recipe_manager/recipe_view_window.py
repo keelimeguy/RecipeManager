@@ -1,9 +1,9 @@
 from Tkinter import *
 
-# from recipe_book import RecipeBook
-# from modal_window import ModalWindow
-from recipe_manager.recipe_book import RecipeBook
-from recipe_manager.modal_window import ModalWindow
+from recipe_book import RecipeBook
+from modal_window import ModalWindow
+# from recipe_manager.recipe_book import RecipeBook
+# from recipe_manager.modal_window import ModalWindow
 from recipe_creation_window import RecipeCreationWindow
 
 class RecipeViewWindow(Frame):
