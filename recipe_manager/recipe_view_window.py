@@ -17,6 +17,7 @@ class RecipeViewWindow(Frame):
         self.window.pack(fill=BOTH, expand=YES)
         self.footer = Frame(root)
         self.footer.pack(fill=BOTH)
+        self.root.bind_all("<MouseWheel>", self.on_mousewheel)
 
         self.first=True
 
@@ -100,6 +101,10 @@ class RecipeViewWindow(Frame):
         self.id_list = id_list
         self.search = search
         self.populate()
+
+    def on_mousewheel(self, event):
+        self.canvas.yview_scroll(-1*(event.delta/120), "units") # Windows
+        # self.canvas.yview_scroll(-1*(event.delta), "units") # OS X
 
     def destroy(self):
         self.header.destroy()

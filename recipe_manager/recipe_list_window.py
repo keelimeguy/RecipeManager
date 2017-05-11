@@ -25,6 +25,7 @@ class RecipeListWindow(Frame):
         self.window.pack(fill=BOTH, expand=YES)
         self.footer = Frame(root)
         self.footer.pack(fill=BOTH)
+        self.root.bind_all("<MouseWheel>", self.on_mousewheel)
 
         self.button_create = Button(self.header, text="New Recipe", command=self.create_recipe)
         self.button_create.pack(side=LEFT)
@@ -62,6 +63,10 @@ class RecipeListWindow(Frame):
         else:
             self.populate()
 
+    def on_mousewheel(self, event):
+        self.recipe_list.yview_scroll(-1*(event.delta/120), "units") # Windows
+        # self.recipe_list.yview_scroll(-1*(event.delta), "units") # OS X
+
     def on_select(self, event):
         if event>=0:
             self.manager.view_recipe(event)
@@ -96,7 +101,6 @@ class RecipeListWindow(Frame):
         self.footer.destroy()
 
     def load_json(self):
-        # current_dir = os.path.dirname(os.path.realpath(__file__))
         current_dir = os.getcwd()
         if not os.path.isfile(os.path.join(current_dir,"recipe_format.json")):
             with open(os.path.join(current_dir,"recipe_format.json"),"w") as f:
