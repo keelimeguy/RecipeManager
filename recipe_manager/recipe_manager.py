@@ -14,19 +14,20 @@ class RecipeManager():
     def __init__(self, root, database):
         self.root = root
         self.root.title("Recipe Manager")
-        self.root.maxsize(423,607)
 
         self.database = database
         self.my_gui = RecipeListWindow(self.root, self.database, self)
         root.mainloop()
 
     def browse(self):
-        self.my_gui.window.destroy()
+        self.my_gui.destroy()
         search = self.my_gui.search
         self.my_gui = RecipeListWindow(self.root, self.database, self, search)
 
     def view_recipe(self, index):
-        self.my_gui.window.destroy()
+        self.my_gui.destroy()
+        self.my_gui.destroy()
+        self.my_gui.destroy()
         id_list = self.my_gui.id_list
         search = self.my_gui.search
         self.my_gui = RecipeViewWindow(self.root, self.database, self, index, id_list, search)
