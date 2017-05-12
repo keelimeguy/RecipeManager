@@ -18,8 +18,11 @@ class RecipeViewWindow(Frame):
         self.footer = Frame(root)
         self.footer.pack(fill=BOTH)
         self.root.bind_all("<MouseWheel>", self.on_mousewheel)
+        self.root.bind("<Left>", self.shift_left)
+        self.root.bind("<Right>", self.shift_right)
 
         self.first=True
+        self.destroyed=False
 
         self.canvas = Canvas(self.window, borderwidth=0, background="#ffffff", width=450, height=560)
         self.vsb = Scrollbar(self.window, orient="vertical", command=self.canvas.yview)
@@ -107,9 +110,12 @@ class RecipeViewWindow(Frame):
         # self.canvas.yview_scroll(-1*(event.delta), "units") # OS X
 
     def destroy(self):
+        self.root.unbind("<Left>")
+        self.root.unbind("<Right>")
         self.header.destroy()
         self.window.destroy()
         self.footer.destroy()
+        self.destroyed = True
 
     def populate(self):
         book = RecipeBook(self.database)
@@ -184,11 +190,11 @@ class RecipeViewWindow(Frame):
             self.populate()
             self.first=False
 
-    def shift_left(self):
+    def shift_left(self, event=None):
         self.index-=1
         self.populate()
 
-    def shift_right(self):
+    def shift_right(self, event=None):
         self.index+=1
         self.populate()
 
@@ -196,10 +202,11 @@ class RecipeViewWindow(Frame):
         book = RecipeBook(self.database)
         recipe, r_id, self.index = book.select_recipe(self.index, self.id_list)
         book.close()
-        old_id = r_id
         w = RecipeCreationWindow(Toplevel(self), self.database, self.root, recipe)
-        self.wait_window(w)
+        w.master.focus()
+        self.wait_window(w.master)
         if w.final != None:
+            old_id = w.old_id
             book = RecipeBook(self.database)
             book.cursor.execute("""
                 SELECT r.id
@@ -207,22 +214,32 @@ class RecipeViewWindow(Frame):
                 WHERE r.name = ?
                 """, [w.final])
             r_id = book.cursor.fetchone()[0]
-            self.id_list = [r_id if x==old_id else x for x in self.id_list]
-            next_index = book.select_index(r_id, self.id_list)
             book.close()
-            self.index =  next_index if next_index else self.index
-            self.populate()
+            self.manager.my_gui.repopulate(old_id, r_id)
+
+    def repopulate(self, old_id, r_id):
+        if old_id in self.id_list:
+            self.id_list = [r_id if x==old_id else x for x in self.id_list]
+        else:
+            self.id_list.append(r_id)
+        book = RecipeBook(self.database)
+        next_index = book.select_index(r_id, self.id_list)
+        self.index =  next_index if next_index else self.index
+        self.populate()
 
     def browse_recipe(self):
         self.manager.browse()
 
     def remove_recipe(self):
-        d = ModalWindow(self, "Delete Recipe", "Do you want to delete the current recipe?")
-        self.wait_window(d.modalWindow)
-        if d.choice == 'No':
-            return
         book = RecipeBook(self.database)
-        book.delete(book.select_recipe(self.index, self.id_list)[1])
-        book.close()
-        self.id_list.remove(self.id_list[self.index])
-        self.populate()
+        recipe, r_id, index = book.select_recipe(self.index, self.id_list)
+        d = ModalWindow(self, "Delete Recipe", "Are you sure you want to delete {}?".format(recipe[0][1]))
+        d.modalWindow.focus()
+        self.wait_window(d.modalWindow)
+        if d.choice == 'Yes':
+            book.delete(r_id)
+            book.close()
+            self.id_list.remove(r_id)
+            self.populate()
+        else:
+            book.close()

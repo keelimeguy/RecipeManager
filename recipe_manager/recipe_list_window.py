@@ -76,11 +76,12 @@ class RecipeListWindow(Frame):
 
     def sort_column_sngl(self, event, dbl=False):
         region = self.recipe_list.identify(event.x, event.y)
-        if region[0]!='header':
-            if dbl and region[1]>0:
-                self.on_select(self.orig_index_list.index(region[1]-1))
-            return
-        self.sort_column(region[1])
+        if region:
+            if region[0]!='header':
+                if dbl and region[1]>0:
+                    self.on_select(self.orig_index_list.index(region[1]-1))
+                return
+            self.sort_column(region[1])
 
     def sort_column(self, col):
         size = len(self.id_list)
@@ -157,9 +158,22 @@ class RecipeListWindow(Frame):
             index+=1
 
     def create_recipe(self):
-        recipe = None
-        w = RecipeCreationWindow(Toplevel(self), self.database, self.root, recipe)
-        self.wait_window(w)
+        w = RecipeCreationWindow(Toplevel(self), self.database, self.root, None)
+        w.master.focus()
+        self.wait_window(w.master)
+        if w.final != None:
+            old_id = w.old_id
+            book = RecipeBook(self.database)
+            book.cursor.execute("""
+                SELECT r.id
+                FROM Recipe r
+                WHERE r.name = ?
+                """, [w.final])
+            r_id = book.cursor.fetchone()[0]
+            book.close()
+            self.manager.my_gui.repopulate(old_id, r_id)
+
+    def repopulate(self, old_id, r_id):
         self.search = None
         self.search_text.delete("1.0", END)
         self.populate()

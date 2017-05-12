@@ -15,6 +15,7 @@ class RecipeCreationWindow(Frame):
 
         self.selected = False
         self.database = database
+        self.old_id = None
         self.final = None
 
         self.name_label = Label(self.master, text="Name:").grid(row=0, column=0, columnspan=2, sticky=E)
@@ -218,10 +219,12 @@ class RecipeCreationWindow(Frame):
         if result:
             d = ModalWindow(self, "Overwrite Recipe", "Warning: Recipe name already exists.\nDo you want to overwrite?")
             self.wait_window(d.modalWindow)
-            if d.choice == 'No':
+            if d.choice == 'Yes':
+                force = True
+                self.old_id = result[0]
+            else:
                 book.close()
                 return
-            force = True
         book.add(name, self.desc_text.get("1.0", END).strip(), self.inst_text.get("1.0", END).strip(),
             servings, self.note_text.get("1.0", END).strip(), prep, cook, [(ingr[0], ingr[1].strip(), ingr[2].strip()) for ingr in self.ingr_list.get(0, END)], force)
         book.save()
