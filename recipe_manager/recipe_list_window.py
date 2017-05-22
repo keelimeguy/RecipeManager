@@ -5,8 +5,10 @@ from TkTreectrl import *
 
 from recipe_book import RecipeBook
 from recipe_creation_window import RecipeCreationWindow
+from recipe_search_window import RecipeSearchWindow
 # from recipe_manager.recipe_book import RecipeBook
 # from recipe_manager.recipe_creation_window import RecipeCreationWindow
+# from recipe_manager.recipe_search_window import RecipeSearchWindow
 
 class RecipeListWindow(Frame):
 
@@ -34,6 +36,9 @@ class RecipeListWindow(Frame):
         self.search_text.bind('<Return>', self.search_recipe)
         self.search_text.pack(side=LEFT, fill=X, expand=YES)
         self.search_button = Button(self.header, text="Search", command=self.search_recipe)
+        self.search_button.pack(side=LEFT)
+
+        self.search_button = Button(self.header, text="..", command=self.adv_search)
         self.search_button.pack(side=LEFT)
 
         self.manager = manager
@@ -179,7 +184,13 @@ class RecipeListWindow(Frame):
         self.populate()
 
     def adv_search(self, event=None):
-        pass
+        w = RecipeSearchWindow(Toplevel(self), self.root)
+        w.master.focus()
+        self.wait_window(w.master)
+        if w.final != None:
+            self.search_text.delete("1.0", END)
+            self.search_text.insert("1.0", w.final)
+            self.search_recipe()
 
     def search_recipe(self, event=None):
         search = self.search_text.get("1.0", END).strip()
@@ -191,7 +202,14 @@ class RecipeListWindow(Frame):
             joiner = " OR "
             for search in search_or.split("&"):
                 # AND-ed terms
+                if not search or search.strip() == "":
+                    break
                 search = search.strip()
+                if search[0] == "~" and len(search)>1:
+                    search = search[1:]
+                    negate = True
+                else:
+                    negate = False
                 searched = False
                 for val in ["prep", "cook", "serves"]:
                     if val in search:
@@ -199,13 +217,16 @@ class RecipeListWindow(Frame):
                             if val+cond in search:
                                 search = search.split(cond)[1]
                                 key = ("r.{} {} {}".format(val+"_time" if val!="serves" else "yield", cond, search) if search else None)
+                                if negate:
+                                    key = "NOT ({})".format(key)
                                 if key:
                                     search_key = (joiner.join([search_key, key]) if search_key else key)
                                     joiner = " AND "
                                 sort_by = val
                                 searched = True
                 if not searched:
-                    key = "(r.name LIKE \'%{}%\' OR r.notes LIKE \'%{}%\')".format(search, search)
+                    like_term = ("NOT LIKE" if negate else "LIKE")
+                    key = "(r.name {} \'%{}%\' {} r.notes {} \'%{}%\')".format(like_term, search, "AND" if negate else "OR", like_term, search)
                     search_key = (joiner.join([search_key, key]) if search_key else key)
                     joiner = " AND "
         self.populate(search_key)
