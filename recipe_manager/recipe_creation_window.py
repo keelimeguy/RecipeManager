@@ -227,7 +227,6 @@ class RecipeCreationWindow(Frame):
                 return
         book.add(name, self.desc_text.get("1.0", END).strip(), self.inst_text.get("1.0", END).strip(),
             servings, self.note_text.get("1.0", END).strip(), prep, cook, [(ingr[0], ingr[1].strip(), ingr[2].strip()) for ingr in self.ingr_list.get(0, END)], force)
-        book.save()
-        book.close()
+        book.close(True)
         self.master.destroy()
         self.final = name

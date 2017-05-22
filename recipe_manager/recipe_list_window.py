@@ -17,7 +17,7 @@ class RecipeListWindow(Frame):
     def OnFrameConfigure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
-    def __init__(self, root, database, manager, search=None):
+    def __init__(self, root, database, manager, preferences, search=None):
         Frame.__init__(self, root)
         self.root = root
         self.header = Frame(root)
@@ -27,6 +27,7 @@ class RecipeListWindow(Frame):
         self.footer = Frame(root)
         self.footer.pack(fill=BOTH)
         self.root.bind_all("<MouseWheel>", self.on_mousewheel)
+        self.preferences = preferences
 
         self.button_create = Button(self.header, text="New Recipe", command=self.create_recipe)
         self.button_create.pack(side=LEFT)
@@ -107,17 +108,19 @@ class RecipeListWindow(Frame):
 
     def load_json(self):
         current_dir = os.getcwd()
-        if not os.path.isfile(os.path.join(current_dir,"recipe_format.json")):
-            with open(os.path.join(current_dir,"recipe_format.json"),"w") as f:
-                self.recipe_format = {"name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
+        if not os.path.isfile(os.path.join(current_dir,self.preferences)):
+            with open(os.path.join(current_dir,self.preferences),"w") as f:
+                self.recipe_format = {"database":"recipe_data.db", "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
                 json.dump(self.recipe_format, f)
         else:
-            with open(os.path.join(current_dir,"recipe_format.json"),"r") as f:
+            with open(os.path.join(current_dir,self.preferences),"r") as f:
                 self.recipe_format = json.load(f)
                 if self.recipe_format["name"]!=1:
-                    raise ValueError("Key \"name\" must hav value \"1\" in recipe_format.json")
+                    raise ValueError("Key \"name\" must have value \"1\" in {}".format(self.preferences))
+        del self.recipe_format["database"]
 
     def populate(self, search=None):
+        self.load_json()
         self.recipe_list.delete(0, END)
         book = RecipeBook(self.database)
         formatting = []

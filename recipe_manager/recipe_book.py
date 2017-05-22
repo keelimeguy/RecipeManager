@@ -249,5 +249,7 @@ class RecipeBook:
     def save(self):
         self.connection.commit()
 
-    def close(self):
+    def close(self, save=False):
+        if save:
+            self.save()
         self.connection.close()

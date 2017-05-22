@@ -7,7 +7,7 @@ from modal_window import ModalWindow
 from recipe_creation_window import RecipeCreationWindow
 
 class RecipeViewWindow(Frame):
-    def __init__(self, root, database, manager, index=0, id_list=None, search=None):
+    def __init__(self, root, database, manager, preferences, index=0, id_list=None, search=None):
         Frame.__init__(self, root)
         self.manager = manager
         self.root = root
@@ -20,6 +20,7 @@ class RecipeViewWindow(Frame):
         self.root.bind_all("<MouseWheel>", self.on_mousewheel)
         self.root.bind("<Left>", self.shift_left)
         self.root.bind("<Right>", self.shift_right)
+        self.preferences = preferences
 
         self.first=True
         self.destroyed=False
