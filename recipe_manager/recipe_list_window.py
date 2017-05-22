@@ -178,16 +178,37 @@ class RecipeListWindow(Frame):
         self.search_text.delete("1.0", END)
         self.populate()
 
+    def adv_search(self, event=None):
+        pass
+
     def search_recipe(self, event=None):
         search = self.search_text.get("1.0", END).strip()
-        for cond in ["=", ">=", "<=", ">", "<"]:
-            for val in ["prep", "cook", "serves"]:
-                if val+cond in search:
-                    self.search = search
-                    search = search.split(cond)[1]
-                    self.populate(("r.{} {} {}".format(val+"_time" if val!="serves" else "yield", cond, search)) if search else None)
-                    self.sort_column(self.recipe_format[val+"_time" if val!="serves" else "yield"]-1)
-                    return "break"
         self.search = search
-        self.populate("r.name LIKE \'%"+search+"%\' OR r.notes LIKE \'%"+search+"%\'")
+        search_key = None
+        sort_by = None
+        for search_or in self.search.split("|"):
+            # OR-ed terms
+            joiner = " OR "
+            for search in search_or.split("&"):
+                # AND-ed terms
+                search = search.strip()
+                searched = False
+                for val in ["prep", "cook", "serves"]:
+                    if val in search:
+                        for cond in ["=", ">=", "<=", ">", "<"]:
+                            if val+cond in search:
+                                search = search.split(cond)[1]
+                                key = ("r.{} {} {}".format(val+"_time" if val!="serves" else "yield", cond, search) if search else None)
+                                if key:
+                                    search_key = (joiner.join([search_key, key]) if search_key else key)
+                                    joiner = " AND "
+                                sort_by = val
+                                searched = True
+                if not searched:
+                    key = "(r.name LIKE \'%{}%\' OR r.notes LIKE \'%{}%\')".format(search, search)
+                    search_key = (joiner.join([search_key, key]) if search_key else key)
+                    joiner = " AND "
+        self.populate(search_key)
+        if sort_by:
+            self.sort_column(self.recipe_format[sort_by+"_time" if sort_by!="serves" else "yield"]-1)
         return "break"
