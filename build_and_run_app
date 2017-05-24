@@ -1,2 +1,0 @@
-pyinstaller --onefile recipe_manager/recipe_manager.py
-dist/recipe_manager.exe

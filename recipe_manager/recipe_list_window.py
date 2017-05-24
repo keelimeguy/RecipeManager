@@ -3,10 +3,12 @@ import json
 from Tkinter import *
 from TkTreectrl import *
 
-from recipe_book import RecipeBook
-from recipe_creation_window import RecipeCreationWindow
-# from recipe_manager.recipe_book import RecipeBook
-# from recipe_manager.recipe_creation_window import RecipeCreationWindow
+if __debug__:
+    from recipe_book import RecipeBook
+    from recipe_creation_window import RecipeCreationWindow
+else:
+    from recipe_manager.recipe_book import RecipeBook
+    from recipe_manager.recipe_creation_window import RecipeCreationWindow
 from recipe_search_window import RecipeSearchWindow
 
 class RecipeListWindow(Frame):

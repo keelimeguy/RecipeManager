@@ -6,20 +6,23 @@ import argparse
 import os
 import json
 
-from recipe_book import RecipeBook
-from modal_window import ModalWindow
-from recipe_view_window import RecipeViewWindow
-from recipe_list_window import RecipeListWindow
-from documentation_window import DocumentationWindow
-from about_window import AboutWindow
-from recipe_format_edit_window import RecipeFormatEditWindow
-# from recipe_manager.recipe_book import RecipeBook
-# from recipe_manager.modal_window import ModalWindow
-# from recipe_manager.recipe_view_window import RecipeViewWindow
-# from recipe_manager.recipe_list_window import RecipeListWindow
-# from recipe_manager.documentation_window import DocumentationWindow
-# from recipe_manager.about_window import AboutWindow
-# from recipe_manager.recipe_format_edit_window import RecipeFormatEditWindow
+if __debug__:
+    print("debug")
+    from recipe_book import RecipeBook
+    from modal_window import ModalWindow
+    from recipe_view_window import RecipeViewWindow
+    from recipe_list_window import RecipeListWindow
+    from documentation_window import DocumentationWindow
+    from about_window import AboutWindow
+    from recipe_format_edit_window import RecipeFormatEditWindow
+else:
+    from recipe_manager.recipe_book import RecipeBook
+    from recipe_manager.modal_window import ModalWindow
+    from recipe_manager.recipe_view_window import RecipeViewWindow
+    from recipe_manager.recipe_list_window import RecipeListWindow
+    from recipe_manager.documentation_window import DocumentationWindow
+    from recipe_manager.about_window import AboutWindow
+    from recipe_manager.recipe_format_edit_window import RecipeFormatEditWindow
 
 class RecipeManager():
     def __init__(self, root, database, preference_file):

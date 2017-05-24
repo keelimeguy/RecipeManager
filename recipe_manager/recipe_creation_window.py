@@ -1,7 +1,10 @@
 from Tkinter import *
 
-from recipe_book import RecipeBook
-# from recipe_manager.recipe_book import RecipeBook
+
+if __debug__:
+    from recipe_book import RecipeBook
+else:
+    from recipe_manager.recipe_book import RecipeBook
 from modal_window import ModalWindow
 
 class RecipeCreationWindow(Frame):
