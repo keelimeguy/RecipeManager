@@ -12,18 +12,20 @@ from recipe_view_window import RecipeViewWindow
 from recipe_list_window import RecipeListWindow
 from documentation_window import DocumentationWindow
 from about_window import AboutWindow
+from recipe_format_edit_window import RecipeFormatEditWindow
 # from recipe_manager.recipe_book import RecipeBook
 # from recipe_manager.modal_window import ModalWindow
 # from recipe_manager.recipe_view_window import RecipeViewWindow
 # from recipe_manager.recipe_list_window import RecipeListWindow
 # from recipe_manager.documentation_window import DocumentationWindow
 # from recipe_manager.about_window import AboutWindow
+# from recipe_manager.recipe_format_edit_window import RecipeFormatEditWindow
 
 class RecipeManager():
-    def __init__(self, root, database, preferences):
+    def __init__(self, root, database, preference_file):
         self.root = root
         self.root.title("Recipe Manager")
-        self.preferences = preferences
+        self.preference_file = preference_file
         self.database = database
 
         self.menubar = Menu(self.root)
@@ -54,19 +56,19 @@ class RecipeManager():
 
         self.root.config(menu=self.menubar)
 
-        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preferences)
+        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
         root.mainloop()
 
     def browse(self):
         self.my_gui.destroy()
         search = self.my_gui.search
-        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preferences, search)
+        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file, search)
 
     def view_recipe(self, index):
         self.my_gui.destroy()
         id_list = self.my_gui.id_list
         search = self.my_gui.search
-        self.my_gui = RecipeViewWindow(self.root, self.database, self, self.preferences, index, id_list, search)
+        self.my_gui = RecipeViewWindow(self.root, self.database, self, self.preference_file, index, id_list, search)
 
     def docs(self):
         w = DocumentationWindow(self.root)
@@ -76,6 +78,10 @@ class RecipeManager():
         w = AboutWindow(self.root)
         self.my_gui.wait_window(w.master)
 
+    def set_recipe_format(self):
+        w = RecipeFormatEditWindow(self.root, self.preference_file)
+        self.my_gui.wait_window(w.master)
+
     def load_database(self):
         self.fileoptions['title'] = 'Load Database'
         filename = tkFileDialog.askopenfilename(**self.fileoptions)
@@ -83,7 +89,7 @@ class RecipeManager():
             file_structure = filename.split("/")
             self.database = file_structure[len(file_structure)-1]
         self.my_gui.destroy()
-        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preferences)
+        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
 
     def import_database(self):
         self.fileoptions['title'] = 'Import Database'
@@ -93,7 +99,7 @@ class RecipeManager():
             database_file = file_structure[len(file_structure)-1]
             self.combine_databases(source_file=database_file, dest_file=self.database)
         self.my_gui.destroy()
-        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preferences)
+        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
 
     def export_database(self):
         self.fileoptions['title'] = 'Export Database'
@@ -149,9 +155,6 @@ class RecipeManager():
         dest.renumber()
         dest.close(True)
 
-    def set_recipe_format(self):
-        pass
-
     def set_database_pref(self):
         fileoptions = { 'defaultextension':".db",
                         'filetypes':[('database files', '.db'), ('all files', '.*')],
@@ -164,24 +167,24 @@ class RecipeManager():
             database_file = file_structure[len(file_structure)-1]
 
             current_dir = os.getcwd()
-            if not os.path.isfile(os.path.join(current_dir,self.preferences)):
-                with open(os.path.join(current_dir,self.preferences),"w") as f:
+            if not os.path.isfile(os.path.join(current_dir,self.preference_file)):
+                with open(os.path.join(current_dir,self.preference_file),"w") as f:
                     recipe_format = {"database":database_file, "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
                     json.dump(recipe_format, f)
             else:
-                with open(os.path.join(current_dir,self.preferences),"r") as f:
+                with open(os.path.join(current_dir,self.preference_file),"r") as f:
                     recipe_format = json.load(f)
-                with open(os.path.join(current_dir,self.preferences),"w") as f:
+                with open(os.path.join(current_dir,self.preference_file),"w") as f:
                     recipe_format["database"] = database_file
                     json.dump(recipe_format, f)
 
 if __name__ == "__main__":
-    preferences = "recipe_format.json"
+    preference_file = "recipe_format.json"
     current_dir = os.getcwd()
-    if not os.path.isfile(os.path.join(current_dir,preferences)):
+    if not os.path.isfile(os.path.join(current_dir,preference_file)):
         database = "recipe_data.db"
     else:
-        with open(os.path.join(current_dir,preferences),"r") as f:
+        with open(os.path.join(current_dir,preference_file),"r") as f:
             recipe_format = json.load(f)
             database = recipe_format["database"]
 
@@ -190,4 +193,4 @@ if __name__ == "__main__":
     book.close(True)
 
     root = Tk()
-    manager = RecipeManager(root, database, preferences)
+    manager = RecipeManager(root, database, preference_file)
