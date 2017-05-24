@@ -42,7 +42,7 @@ class RecipeFormatEditWindow(object):
         current_dir = os.getcwd()
         if not os.path.isfile(os.path.join(current_dir,self.preference_file)):
             with open(os.path.join(current_dir,self.preference_file),"w") as f:
-                self.recipe_format = {"database":"recipe_data.db", "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
+                self.recipe_format = {"database":os.path.join(current_dir,"recipe_data.db"), "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
                 json.dump(self.recipe_format, f)
         else:
             with open(os.path.join(current_dir,self.preference_file),"r") as f:
@@ -50,28 +50,31 @@ class RecipeFormatEditWindow(object):
                     if self.recipe_format["name"]!=1:
                         raise ValueError("Key \"name\" must have value \"1\" in {}".format(self.preference_file))
         for k, v in sorted(self.recipe_format.iteritems(), key=lambda (k,v): (v,k)):
-            if v > 0:
-                self.listbox.insert(END, k.replace(' ', '').replace('_', ' ').title())
-            else if not k in ["database"]:
-                self.listbox_unused.insert(END, k.replace(' ', '').replace('_', ' ').title())
+            if not k in ["database"]:
+                if v > 0:
+                    self.listbox.insert(END, k.replace(' ', '').replace('_', ' ').title())
+                else:
+                    self.listbox_unused.insert(END, k.replace(' ', '').replace('_', ' ').title())
 
     def add(self):
-        pass
+        for i in self.listbox_unused.curselection():
+            self.listbox.insert(END, self.listbox_unused.get(i))
+            self.listbox_unused.delete(i)
 
     def remove(self):
-        pass
+        for i in self.listbox.curselection():
+            if i is not 0:
+                self.listbox_unused.insert(END, self.listbox.get(i))
+                self.listbox.delete(i)
 
     def format(self):
         for i in range(self.listbox.size()):
-            self.recipe_format[self.listbox.get(i).replace(' ', '_').lower()] = i
-            self.listbox.delete(i)
-        while self.listbox_unused.size()>0:
-            self.recipe_format[self.listbox_unused.get(0).replace(' ', '_').lower()] = 0
-            self.listbox.delete(0)
-
-        if self.recipe_format["name"]!=1:
-            raise ValueError("Key \"name\" must have value \"1\" in {}".format(self.preference_file))
+            self.recipe_format[self.listbox.get(i).replace(' ', '_').lower()] = i+1
+        for i in range(self.listbox_unused.size()):
+            self.recipe_format[self.listbox_unused.get(i).replace(' ', '_').lower()] = 0
 
         current_dir = os.getcwd()
         with open(os.path.join(current_dir,self.preference_file),"w") as f:
             json.dump(self.recipe_format, f)
+
+        self.master.destroy()

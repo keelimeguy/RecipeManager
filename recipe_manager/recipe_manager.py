@@ -81,13 +81,14 @@ class RecipeManager():
     def set_recipe_format(self):
         w = RecipeFormatEditWindow(self.root, self.preference_file)
         self.my_gui.wait_window(w.master)
+        self.my_gui.destroy()
+        self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
 
     def load_database(self):
         self.fileoptions['title'] = 'Load Database'
         filename = tkFileDialog.askopenfilename(**self.fileoptions)
         if filename:
-            file_structure = filename.split("/")
-            self.database = file_structure[len(file_structure)-1]
+            self.database = filename
         self.my_gui.destroy()
         self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
 
@@ -95,9 +96,7 @@ class RecipeManager():
         self.fileoptions['title'] = 'Import Database'
         filename = tkFileDialog.askopenfilename(**self.fileoptions)
         if filename:
-            file_structure = filename.split("/")
-            database_file = file_structure[len(file_structure)-1]
-            self.combine_databases(source_file=database_file, dest_file=self.database)
+            self.combine_databases(source_file=filename, dest_file=self.database)
         self.my_gui.destroy()
         self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
 
@@ -105,9 +104,7 @@ class RecipeManager():
         self.fileoptions['title'] = 'Export Database'
         filename = tkFileDialog.askopenfilename(**self.fileoptions)
         if filename:
-            file_structure = filename.split("/")
-            database_file = file_structure[len(file_structure)-1]
-            self.combine_databases(source_file=self.database, dest_file=database_file)
+            self.combine_databases(source_file=self.database, dest_file=filename)
 
     def combine_databases(self, source_file, dest_file):
         source = RecipeBook(source_file)
@@ -162,27 +159,28 @@ class RecipeManager():
                         'parent':self.root,
                         'title':'Choose Default Database' }
         filename = tkFileDialog.askopenfilename(**fileoptions)
-        if filename:
-            file_structure = filename.split("/")
-            database_file = file_structure[len(file_structure)-1]
 
-            current_dir = os.getcwd()
-            if not os.path.isfile(os.path.join(current_dir,self.preference_file)):
-                with open(os.path.join(current_dir,self.preference_file),"w") as f:
-                    recipe_format = {"database":database_file, "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
-                    json.dump(recipe_format, f)
-            else:
-                with open(os.path.join(current_dir,self.preference_file),"r") as f:
-                    recipe_format = json.load(f)
-                with open(os.path.join(current_dir,self.preference_file),"w") as f:
-                    recipe_format["database"] = database_file
-                    json.dump(recipe_format, f)
+        if filename:
+            d = ModalWindow(self.my_gui, "Confirmation", "Warning: In the future, if the file at the given location cannot be found at startup\nthe program will automatically create the file at that position.\nIs this okay? Choosing 'No' cancels the change in preferences.")
+            self.my_gui.wait_window(d.modalWindow)
+            if d.choice == 'Yes':
+                current_dir = os.getcwd()
+                if not os.path.isfile(os.path.join(current_dir,self.preference_file)):
+                    with open(os.path.join(current_dir,self.preference_file),"w") as f:
+                        recipe_format = {"database":filename, "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
+                        json.dump(recipe_format, f)
+                else:
+                    with open(os.path.join(current_dir,self.preference_file),"r") as f:
+                        recipe_format = json.load(f)
+                    with open(os.path.join(current_dir,self.preference_file),"w") as f:
+                        recipe_format["database"] = filename
+                        json.dump(recipe_format, f)
 
 if __name__ == "__main__":
-    preference_file = "recipe_format.json"
+    preference_file = "recipe_manager_preferences.json"
     current_dir = os.getcwd()
     if not os.path.isfile(os.path.join(current_dir,preference_file)):
-        database = "recipe_data.db"
+        database = os.path.join(current_dir,"recipe_data.db")
     else:
         with open(os.path.join(current_dir,preference_file),"r") as f:
             recipe_format = json.load(f)

@@ -110,7 +110,7 @@ class RecipeListWindow(Frame):
         current_dir = os.getcwd()
         if not os.path.isfile(os.path.join(current_dir,self.preference_file)):
             with open(os.path.join(current_dir,self.preference_file),"w") as f:
-                self.recipe_format = {"database":"recipe_data.db", "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
+                self.recipe_format = {"database":os.path.join(current_dir,"recipe_data.db"), "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
                 json.dump(self.recipe_format, f)
         else:
             with open(os.path.join(current_dir,self.preference_file),"r") as f:
@@ -160,7 +160,7 @@ class RecipeListWindow(Frame):
             r_str = r[0]
             if len(r)>1:
                 for i in range(len(r)-1):
-                    r_str+=("; {}".format(r[i+1]))
+                    r_str+=(u"; {}".format(r[i+1]))
             item = self.recipe_list.insert(END, *(r))
             index+=1
 
