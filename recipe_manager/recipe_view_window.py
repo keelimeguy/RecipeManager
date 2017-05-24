@@ -21,6 +21,8 @@ class RecipeViewWindow(Frame):
         self.footer.pack(fill=BOTH)
         self.root.bind("<Left>", self.shift_left)
         self.root.bind("<Right>", self.shift_right)
+        self.root.bind("<Up>", self.shift_up)
+        self.root.bind("<Down>", self.shift_down)
         self.preferences = preferences
 
         self.first=True
@@ -209,6 +211,16 @@ class RecipeViewWindow(Frame):
     def shift_right(self, event=None):
         self.index+=1
         self.populate()
+
+    def shift_up(self, event=None):
+        shift_delta = 1
+        self.canvas.yview_scroll(-1*(shift_delta), "units") # Windows
+        # self.canvas.yview_scroll(-1*(shift_delta*120), "units") # OS X
+
+    def shift_down(self, event=None):
+        shift_delta = 1
+        self.canvas.yview_scroll(shift_delta, "units") # Windows
+        # self.canvas.yview_scroll(shift_delta*120, "units") # OS X
 
     def edit_recipe(self):
         book = RecipeBook(self.database)
