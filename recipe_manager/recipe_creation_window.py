@@ -6,6 +6,7 @@ if __debug__:
 else:
     from recipe_manager.recipe_book import RecipeBook
 from modal_window import ModalWindow
+from drag_drop_listbox import DragDropListbox
 
 class RecipeCreationWindow(Frame):
     def __init__(self, master, database, root, recipe=None):
@@ -61,11 +62,12 @@ class RecipeCreationWindow(Frame):
         self.ingr_label = Label(self.master, text="Ingredients:").grid(row=7, column=0, columnspan=2, sticky=E)
         self.ingr_scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.ingr_scrollbar.grid(row=8, column=12, columnspan=1, sticky=W)
-        self.ingr_list = Listbox(self.master, height=4, width=32)
+        self.ingr_list = DragDropListbox(self.master, fix_first=False, height=4, width=32)
         self.ingr_list.grid(row=8, column=2, columnspan=10, sticky=NSEW)
         self.ingr_list.config(yscrollcommand=self.ingr_scrollbar.set)
         self.ingr_list.bind('<BackSpace>', self.rem_ingr)
         self.ingr_list.bind('<<ListboxSelect>>', self.on_select)
+        self.ingr_list.bind("<MouseWheel>", self.on_mousewheel)
         self.ingr_scrollbar.config(command=self.ingr_list.yview)
         self.ingr_amount = Text(self.master, height=1, width=4)
         self.ingr_amount.insert(END, "<#>")
@@ -125,6 +127,10 @@ class RecipeCreationWindow(Frame):
             for i in recipe[1]:
                 self.ingr_list.insert(END, (i[0], i[1] if i[1]!=None else "", i[2]))
                 self.ingr_dict[i[2]] = i[0]
+
+    def on_mousewheel(self, event):
+        self.ingr_list.yview_scroll(-1*(event.delta/120), "units") # Windows
+        # self.recipe_list.yview_scroll(-1*(event.delta), "units") # OS X
 
     def _focusNext(self, widget):
         '''Return the next widget in tab order'''

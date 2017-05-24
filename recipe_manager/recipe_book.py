@@ -72,6 +72,7 @@ class RecipeBook:
             ingredient_id INTEGER,
             measure_id INTEGER,
             amount REAL,
+            order_num INTEGER,
             CONSTRAINT fk_recipe FOREIGN KEY(recipe_id) REFERENCES Recipe(id),
             CONSTRAINT fk_ingredient FOREIGN KEY(ingredient_id) REFERENCES Ingredient(id),
             CONSTRAINT fk_measure FOREIGN KEY(measure_id) REFERENCES Measure(id)
@@ -105,9 +106,9 @@ class RecipeBook:
             WHERE r.name = ?""", [name])
         return self.cursor.fetchone()[0]
 
-    def add_recipe_ingredient(self, recipe_id, ingredient_id, measure_id, amount):
-        self.cursor.execute("""INSERT OR IGNORE INTO RecipeIngredient (recipe_id, ingredient_id, measure_id, amount)
-            VALUES (?, ?, ?, ?)""", (recipe_id, ingredient_id, measure_id, amount))
+    def add_recipe_ingredient(self, recipe_id, ingredient_id, measure_id, amount, order_num):
+        self.cursor.execute("""INSERT OR IGNORE INTO RecipeIngredient (recipe_id, ingredient_id, measure_id, amount, order_num)
+            VALUES (?, ?, ?, ?, ?)""", (recipe_id, ingredient_id, measure_id, amount, order_num))
 
     def add(self, name, description, instructions, amount_yield, notes, prep_time, cook_time, ingredients, force=False, r_id=None):
         if force:
@@ -123,17 +124,23 @@ class RecipeBook:
                 self.cursor.execute("""DELETE FROM Recipe WHERE name = ?""", [name])
                 self.cursor.execute("""DELETE FROM RecipeIngredient WHERE recipe_id = ?""", [r_id])
         r_id = self.add_recipe(name, description, instructions, amount_yield, notes, prep_time, cook_time)
+        order_num = None
+        if not len(ingredients[0])==4:
+            order_num = 1
         for i in ingredients:
             i_id = self.add_ingredient(i[2])
             mu_id = self.add_measure(i[1])
-            self.add_recipe_ingredient(r_id, i_id, mu_id, i[0])
+            self.add_recipe_ingredient(r_id, i_id, mu_id, i[0], order_num if order_num else i[3])
+            if order_num:
+                order_num+=1
         return r_id
 
     def get(self, recipe_id):
         result = self.cursor.execute("""
             SELECT ri.amount AS 'Amount',
             mu.name AS 'Unit of Measure',
-            i.name AS 'Ingredient'
+            i.name AS 'Ingredient',
+            ri.order_num AS 'Order'
             FROM Recipe r
             JOIN RecipeIngredient ri on r.id = ri.recipe_id
             JOIN Ingredient i on i.id = ri.ingredient_id
@@ -234,7 +241,8 @@ class RecipeBook:
                 result = self.cursor.execute("""
                     SELECT ri.amount AS 'Amount',
                     mu.name AS 'Unit of Measure',
-                    i.name AS 'Ingredient'
+                    i.name AS 'Ingredient',
+                    ri.order_num AS 'Order'
                     FROM Recipe_clone r
                     JOIN RecipeIngredient ri on r.id = ri.recipe_id
                     JOIN Ingredient i on i.id = ri.ingredient_id

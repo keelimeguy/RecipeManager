@@ -28,7 +28,6 @@ class RecipeListWindow(Frame):
         self.window.pack(fill=BOTH, expand=YES)
         self.footer = Frame(root)
         self.footer.pack(fill=BOTH)
-        self.root.bind_all("<MouseWheel>", self.on_mousewheel)
         self.preference_file = preference_file
 
         self.button_create = Button(self.header, text="New Recipe", command=self.create_recipe)
@@ -54,6 +53,7 @@ class RecipeListWindow(Frame):
         self.recipe_list.configure(yscrollcommand=self.vsb.set)
         self.hsb = Scrollbar(self.footer, orient="horizontal", command=self.recipe_list.xview)
         self.recipe_list.configure(xscrollcommand=self.hsb.set)
+        self.recipe_list.bind("<MouseWheel>", self.on_mousewheel)
 
         self.vsb.pack(fill=BOTH, side=LEFT)
         self.hsb.pack(fill=BOTH)

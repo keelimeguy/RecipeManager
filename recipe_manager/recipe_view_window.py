@@ -19,7 +19,6 @@ class RecipeViewWindow(Frame):
         self.window.pack(fill=BOTH, expand=YES)
         self.footer = Frame(root)
         self.footer.pack(fill=BOTH)
-        self.root.bind_all("<MouseWheel>", self.on_mousewheel)
         self.root.bind("<Left>", self.shift_left)
         self.root.bind("<Right>", self.shift_right)
         self.preferences = preferences
@@ -67,6 +66,9 @@ class RecipeViewWindow(Frame):
         self.canvas.bind("<Configure>", self.onCanvasConfigure)
         self.frame.bind("<Configure>", self.onFrameConfigure)
 
+        self.canvas.bind('<Enter>', self._bound_to_mousewheel)
+        self.canvas.bind('<Leave>', self._unbound_to_mousewheel)
+
         self.name_label = Label(self.frame, text="Name", bg="white", font=("Times", 18, "bold"), wraplength=self.canvas_width)
         self.name_label.grid(row=0, column=0, columnspan=6, sticky=W)
         self.serv_label = Label(self.frame, text="Servings", bg="white", font=("Times", 10, ""), justify=LEFT)
@@ -108,6 +110,12 @@ class RecipeViewWindow(Frame):
         self.search = search
         self.populate()
 
+    def _bound_to_mousewheel(self, event):
+        self.bind_all("<MouseWheel>", self.on_mousewheel)
+
+    def _unbound_to_mousewheel(self, event):
+        self.unbind_all("<MouseWheel>")
+
     def on_mousewheel(self, event):
         self.canvas.yview_scroll(-1*(event.delta/120), "units") # Windows
         # self.canvas.yview_scroll(-1*(event.delta), "units") # OS X
@@ -121,6 +129,8 @@ class RecipeViewWindow(Frame):
         self.destroyed = True
 
     def populate(self):
+        self.canvas.yview(MOVETO, 0)
+        self.canvas.xview(MOVETO, 0)
         book = RecipeBook(self.database)
         recipe, r_id, self.index = book.select_recipe(self.index, self.id_list)
         book.close()
@@ -134,7 +144,7 @@ class RecipeViewWindow(Frame):
         cook_time = recipe[0][7] if r_id else "<Cook Time>"
         ingredients = []
         if r_id:
-            for i in recipe[1]:
+            for i in sorted(recipe[1], key=lambda tup: tup[3]):
                 ingredients.append(i)
         else:
             ingredients.append(("<Amount>", "<Unit>", "<Ingredient>"))
