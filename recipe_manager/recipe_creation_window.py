@@ -124,7 +124,7 @@ class RecipeCreationWindow(Frame):
             self.note_text.insert(END, recipe[0][5] if recipe[0][5]!=None else "")
             self.prep_text.insert(END, recipe[0][6])
             self.cook_text.insert(END, recipe[0][7])
-            for i in recipe[1]:
+            for i in sorted(recipe[1], key=lambda tup: tup[3]):
                 self.ingr_list.insert(END, (i[0], i[1] if i[1]!=None else "", i[2]))
                 self.ingr_dict[i[2]] = i[0]
 

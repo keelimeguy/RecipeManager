@@ -122,14 +122,15 @@ class RecipeManager():
                 result = source.cursor.execute("""
                     SELECT ri.amount AS 'Amount',
                     mu.name AS 'Unit of Measure',
-                    i.name AS 'Ingredient'
+                    i.name AS 'Ingredient',
+                    ri.order_num AS 'Order'
                     FROM Recipe r
                     JOIN RecipeIngredient ri on r.id = ri.recipe_id
                     JOIN Ingredient i on i.id = ri.ingredient_id
                     LEFT OUTER JOIN Measure mu on mu.id = measure_id
                     WHERE r.id = ?""", [r[0]])
                 ingredients = []
-                for i in result:
+                for i in sorted(result, key=lambda tup: tup[3]):
                     ingredients.append(i)
 
                 dest.cursor.execute("""
@@ -146,11 +147,11 @@ class RecipeManager():
                         d = ModalWindow(self.my_gui, "Overwrite Recipe", "Warning: Recipe name already exists.\nDo you want to overwrite {}?".format(r[1]))
                         self.my_gui.wait_window(d.modalWindow)
                         if d.choice == 'Yes':
-                            dest.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, True, [r[0]])
+                            dest.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, True)
                     else:
-                        dest.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, force, [r[0]])
+                        dest.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, force)
                 else:
-                    dest.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, False, [r[0]])
+                    dest.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, False)
         source.close()
         dest.renumber()
         dest.close(True)

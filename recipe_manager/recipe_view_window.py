@@ -134,20 +134,19 @@ class RecipeViewWindow(Frame):
         book = RecipeBook(self.database)
         recipe, r_id, self.index = book.select_recipe(self.index, self.id_list)
         book.close()
-
-        name = recipe[0][1] if r_id else "<Name>"
-        description = recipe[0][2] if r_id else "<Description>"
-        directions = recipe[0][3] if r_id else "<Directions>"
-        servings = recipe[0][4] if r_id else "<Servings>"
-        notes = recipe[0][5] if r_id else "<Notes>"
-        prep_time = recipe[0][6] if r_id else "<Prep Time>"
-        cook_time = recipe[0][7] if r_id else "<Cook Time>"
+        name = recipe[0][1] if r_id and recipe[0] else "<Name>"
+        description = recipe[0][2] if r_id and recipe[0] else "<Description>"
+        directions = recipe[0][3] if r_id and recipe[0] else "<Directions>"
+        servings = recipe[0][4] if r_id and recipe[0] else "<Servings>"
+        notes = recipe[0][5] if r_id and recipe[0] else "<Notes>"
+        prep_time = recipe[0][6] if r_id and recipe[0] else "<Prep Time>"
+        cook_time = recipe[0][7] if r_id and recipe[0] else "<Cook Time>"
         ingredients = []
-        if r_id:
+        if r_id and recipe:
             for i in sorted(recipe[1], key=lambda tup: tup[3]):
                 ingredients.append(i)
         else:
-            ingredients.append(("<Amount>", "<Unit>", "<Ingredient>"))
+            ingredients.append(("<Amount>", "<Unit>", "<Ingredient>", "<Order>"))
 
         self.name_label.destroy()
         self.name_label = Label(self.frame, text=name, bg="white", font=("Times", 18, "bold"), wraplength=self.canvas_width)
