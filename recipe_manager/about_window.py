@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = '0.4.6'
+version = '0.4.7'
 
 class AboutWindow(object):
 

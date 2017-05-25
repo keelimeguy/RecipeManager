@@ -14,11 +14,13 @@ class RecipeViewWindow(Frame):
         self.manager = manager
         self.root = root
         self.header = Frame(root)
+        self.under_header = Frame(root)
+        self.window = Frame(self.under_header)
+        self.footer = Frame(self.under_header)
         self.header.pack(fill=BOTH)
-        self.window = Frame(root)
-        self.window.pack(fill=BOTH, expand=YES)
-        self.footer = Frame(root)
-        self.footer.pack(fill=BOTH)
+        self.under_header.pack(fill=BOTH, expand=YES)
+        self.footer.pack(fill=BOTH, side=BOTTOM)
+        self.window.pack(fill=BOTH, expand=YES, side=BOTTOM)
         self.root.bind("<Left>", self.shift_left)
         self.root.bind("<Right>", self.shift_right)
         self.root.bind("<Up>", self.shift_up)
@@ -54,8 +56,8 @@ class RecipeViewWindow(Frame):
 
         self.database = database
 
-        self.canvas.pack(fill=BOTH, expand=YES, side=LEFT)
-        self.vsb.pack(fill=BOTH, side=LEFT)
+        self.vsb.pack(fill=BOTH, side=RIGHT)
+        self.canvas.pack(fill=BOTH, expand=YES, side=RIGHT)
         self.hsb.pack(fill=BOTH)
 
         self.canvas_width = self.canvas.winfo_reqwidth() - 4
@@ -126,6 +128,7 @@ class RecipeViewWindow(Frame):
         self.root.unbind("<Left>")
         self.root.unbind("<Right>")
         self.header.destroy()
+        self.under_header.destroy()
         self.window.destroy()
         self.footer.destroy()
         self.destroyed = True
