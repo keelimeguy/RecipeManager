@@ -1,7 +1,10 @@
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
+from TkTreectrl import *
 import os
 import json
-from Tkinter import *
-from TkTreectrl import *
 
 if __debug__:
     from recipe_book import RecipeBook
@@ -137,11 +140,18 @@ class RecipeListWindow(Frame):
             self.sort_dict.append('decreasing')
         self.recipe_list.column_config(0, width=180)
         str_format = ','.join(formatting)
+
         search_format = " WHERE {}".format(search) if search!=None else ""
         book.cursor.execute("""
             SELECT r.id,{}
-            FROM Recipe r{}""".format(str_format, search_format))
+            FROM Recipe r
+            JOIN (SELECT ri.recipe_id as recipe_id, GROUP_CONCAT(ing.name) as name
+                FROM RecipeIngredient ri
+                JOIN Ingredient ing on ing.id = ri.ingredient_id
+                GROUP BY ri.recipe_id) i on i.recipe_id = r.id{}
+            GROUP BY r.id""".format(str_format, search_format))
         results = book.cursor.fetchall()
+
         self.id_list = []
         self.orig_index_list = []
         self.id_dict = {}
@@ -215,25 +225,46 @@ class RecipeListWindow(Frame):
                 else:
                     negate = False
                 searched = False
-                for val in ["prep", "cook", "serves"]:
-                    if val in search:
-                        for cond in ["=", ">=", "<=", ">", "<"]:
-                            if val+cond in search:
-                                search = search.split(cond)[1]
-                                key = ("r.{} {} {}".format(val+"_time" if val!="serves" else "yield", cond, search) if search else None)
-                                if negate:
-                                    key = "NOT ({})".format(key)
-                                if key:
-                                    search_key = (joiner.join([search_key, key]) if search_key else key)
-                                    joiner = " AND "
-                                sort_by = val
-                                searched = True
+                ingr_cond = None
+
+                for cond in ["ingr:", "ingredient:"]:
+                    if cond in search:
+                        ingr_cond = cond
+                        break
+                if ingr_cond:
+                    search = search.split(ingr_cond)[1]
+                    key = ("i.name {} \'%{}%\'".format("NOT LIKE" if negate else "LIKE", search) if search else None)
+                    if key:
+                        search_key = (joiner.join([search_key, key]) if search_key else key)
+                        joiner = " AND "
+                    searched = True
+                else:
+                    for val in ["prep", "prep_time", "cook", "cook_time", "serve", "serves", "yield", "yields"]:
+                        if val in search:
+                            for cond in ["=", ">=", "<=", ">", "<"]:
+                                if val+cond in search:
+                                    if val == "prep":
+                                        val = "prep_time"
+                                    elif val == "cook":
+                                        val = "cook_time"
+                                    search = search.split(cond)[1]
+                                    key = ("r.{} {} {}".format(val if val in ["prep_time", "cook_time"] else "yield", cond, search) if search else None)
+                                    if key:
+                                        if negate:
+                                            key = "NOT ({})".format(key)
+                                        search_key = (joiner.join([search_key, key]) if search_key else key)
+                                        joiner = " AND "
+                                    sort_by = val
+                                    searched = True
                 if not searched:
                     like_term = ("NOT LIKE" if negate else "LIKE")
-                    key = "(r.name {} \'%{}%\' {} r.notes {} \'%{}%\')".format(like_term, search, "AND" if negate else "OR", like_term, search)
+                    key = "(r.name {} \'%{}%\' {} r.notes {} \'%{}%\')".format(
+                        like_term, search,
+                        "AND" if negate else "OR",
+                        like_term, search)
                     search_key = (joiner.join([search_key, key]) if search_key else key)
                     joiner = " AND "
         self.populate(search_key)
         if sort_by:
-            self.sort_column(self.recipe_format[sort_by+"_time" if sort_by!="serves" else "yield"]-1)
+            self.sort_column(self.recipe_format[sort_by if sort_by in ["prep_time", "cook_time"] else "yield"]-1)
         return "break"

@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-from Tkinter import *
-import tkFileDialog
-import argparse
+try:
+    from Tkinter import *
+    import tkFileDialog
+except ImportError:
+    from tkinter import *
 import os
 import json
 

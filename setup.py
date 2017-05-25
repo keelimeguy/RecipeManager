@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '0.4.7'
+version = '0.5.1'
 
 setup(name='Recipe Manager',  # Feel free to change this
       version=version,

@@ -1,10 +1,13 @@
-import Tkinter
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
 
-class DragDropListbox(Tkinter.Listbox):
+class DragDropListbox(Listbox):
     """ A Tkinter listbox with drag'n'drop reordering of entries. """
     def __init__(self, master, fix_first=False, **kw):
-        kw['selectmode'] = Tkinter.SINGLE
-        Tkinter.Listbox.__init__(self, master, kw)
+        kw['selectmode'] = SINGLE
+        Listbox.__init__(self, master, kw)
         self.bind('<Button-1>', self.setCurrent)
         self.bind('<B1-Motion>', self.shiftSelection)
         self.fix_first = fix_first

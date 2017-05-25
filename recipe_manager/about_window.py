@@ -1,6 +1,9 @@
-from Tkinter import *
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
 
-version = '0.4.7'
+version = '0.5.1'
 
 class AboutWindow(object):
 

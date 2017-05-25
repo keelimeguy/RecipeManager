@@ -1,5 +1,7 @@
-from Tkinter import *
-
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
 
 if __debug__:
     from recipe_book import RecipeBook

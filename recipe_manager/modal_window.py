@@ -1,4 +1,7 @@
-from Tkinter import *
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
 
 class ModalWindow(object):
 
