@@ -12,16 +12,9 @@ if __debug__:
 else:
     from recipe_manager.recipe_book import RecipeBook
     from recipe_manager.recipe_creation_window import RecipeCreationWindow
-from recipe_search_window import RecipeSearchWindow
+from search_window import SearchWindow
 
 class RecipeListWindow(Frame):
-
-    def FrameWidth(self, event):
-        self.canvas.itemconfig(self.frame, width=event.width, height=event.height)
-
-    def OnFrameConfigure(self, event):
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-
     def __init__(self, root, database, manager, preference_file, search=None):
         Frame.__init__(self, root)
         self.root = root
@@ -91,7 +84,11 @@ class RecipeListWindow(Frame):
                 if dbl and region[1]>0:
                     self.on_select(self.orig_index_list.index(region[1]-1))
                 return
-            self.sort_column(region[1])
+            region_r = self.recipe_list.identify(event.x+5, event.y)
+            if region_r and region_r[1]==region[1] or not region_r:
+                region_l = self.recipe_list.identify(event.x-5, event.y)
+                if region_l and region_l[1]==region[1] or not region_l:
+                    self.sort_column(region[1])
 
     def sort_column(self, col):
         size = len(self.id_list)
@@ -175,6 +172,7 @@ class RecipeListWindow(Frame):
                     r_str+=(u"; {}".format(r[i+1]))
             item = self.recipe_list.insert(END, *(r))
             index+=1
+        self.recipe_list.yview(MOVETO, 0)
 
     def create_recipe(self):
         w = RecipeCreationWindow(Toplevel(self), self.database, self.root, None)
@@ -198,7 +196,7 @@ class RecipeListWindow(Frame):
         self.populate()
 
     def adv_search(self, event=None):
-        w = RecipeSearchWindow(Toplevel(self), self.root)
+        w = SearchWindow(Toplevel(self), self.root, "Recipe", "recipes")
         w.master.focus()
         self.wait_window(w.master)
         if w.final != None:

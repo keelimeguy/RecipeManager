@@ -14,6 +14,7 @@ if __debug__:
     from modal_window import ModalWindow
     from recipe_view_window import RecipeViewWindow
     from recipe_list_window import RecipeListWindow
+    from ingredient_list_window import IngredientListWindow
     from documentation_window import DocumentationWindow
     from about_window import AboutWindow
     from recipe_format_edit_window import RecipeFormatEditWindow
@@ -22,6 +23,7 @@ else:
     from recipe_manager.modal_window import ModalWindow
     from recipe_manager.recipe_view_window import RecipeViewWindow
     from recipe_manager.recipe_list_window import RecipeListWindow
+    from recipe_manager.ingredient_list_window import IngredientListWindow
     from recipe_manager.documentation_window import DocumentationWindow
     from recipe_manager.about_window import AboutWindow
     from recipe_manager.recipe_format_edit_window import RecipeFormatEditWindow
@@ -54,6 +56,11 @@ class RecipeManager():
         self.settings_menu.add_command(label="Edit Listed Recipe Format", command=self.set_recipe_format)
         self.menubar.add_cascade(label="Preferences", menu=self.settings_menu)
 
+        self.lists_menu = Menu(self.menubar, tearoff=0)
+        self.lists_menu.add_command(label="Recipes", command=self.fresh_browse)
+        self.lists_menu.add_command(label="Ingredients", command=self.list_ingredients)
+        self.menubar.add_cascade(label="Lists", menu=self.lists_menu)
+
         self.help_menu = Menu(self.menubar, tearoff=0)
         self.help_menu.add_command(label="Documentation", command=self.docs)
         self.help_menu.add_command(label="About Recipe Manager", command=self.about)
@@ -64,10 +71,18 @@ class RecipeManager():
         self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
         root.mainloop()
 
+    def fresh_browse(self):
+        self.my_gui.search = None
+        self.browse()
+
     def browse(self):
         self.my_gui.destroy()
         search = self.my_gui.search
         self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file, search)
+
+    def list_ingredients(self):
+        self.my_gui.destroy()
+        self.my_gui = IngredientListWindow(self.root, self.database, self)
 
     def view_recipe(self, index):
         self.my_gui.destroy()

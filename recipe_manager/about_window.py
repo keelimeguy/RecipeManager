@@ -3,7 +3,7 @@ try:
 except ImportError:
     from tkinter import *
 
-version = '0.5.2'
+version = '0.6.1'
 
 class AboutWindow(object):
 

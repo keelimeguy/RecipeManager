@@ -5,7 +5,7 @@ except ImportError:
 import os
 import json
 
-from drag_drop_listbox import DragDropListbox
+from insertion_listbox import InsertionListbox
 
 class RecipeFormatEditWindow(object):
 
@@ -18,24 +18,16 @@ class RecipeFormatEditWindow(object):
         self.preference_file = preference_file
 
         # Setup the widgets in the window
-        label = Label(self.master, text="Add desired entries to the right side and drag and drop them into the desired order.", justify=LEFT)
+        label = Label(self.master, text="Add entries to the right side then drag and drop them into the desired order.", justify=LEFT)
         label.grid(row = 0, column = 0, columnspan = 4, sticky=W)
 
-        self.listbox_unused = Listbox(self.master)
-        self.listbox_unused.grid(row = 1, column = 0, rowspan=6, sticky=EW)
-
-        self.add_button = Button(self.master, text=">", command=self.add)
-        self.add_button.grid(row=3, column=1, columnspan=2, sticky=S)
-        self.remove_button = Button(self.master, text="<", command=self.remove)
-        self.remove_button.grid(row=4, column=1, columnspan=2, sticky=N)
-
-        self.listbox = DragDropListbox(self.master, True)
-        self.listbox.grid(row = 1, column = 3, rowspan=6, sticky=EW)
+        self.listbox = InsertionListbox(self.master, True)
+        self.listbox.grid(row = 1, column = 0, columnspan = 4)
 
         self.done_button = Button(self.master, text="Done", command=self.format)
-        self.done_button.grid(row=7, column=1, sticky=E)
+        self.done_button.grid(row=2, column=1, sticky=E)
         self.cancel_button = Button(self.master, text="Cancel", command=self.master.destroy)
-        self.cancel_button.grid(row=7, column=2, sticky=W)
+        self.cancel_button.grid(row=2, column=2, sticky=W)
 
         self.master.grab_set()
         self.recipe_format = {}
@@ -57,24 +49,13 @@ class RecipeFormatEditWindow(object):
                 if v > 0:
                     self.listbox.insert(END, k.replace(' ', '').replace('_', ' ').title())
                 else:
-                    self.listbox_unused.insert(END, k.replace(' ', '').replace('_', ' ').title())
-
-    def add(self):
-        for i in self.listbox_unused.curselection():
-            self.listbox.insert(END, self.listbox_unused.get(i))
-            self.listbox_unused.delete(i)
-
-    def remove(self):
-        for i in self.listbox.curselection():
-            if i is not 0:
-                self.listbox_unused.insert(END, self.listbox.get(i))
-                self.listbox.delete(i)
+                    self.listbox.insert_unused(END, k.replace(' ', '').replace('_', ' ').title())
 
     def format(self):
         for i in range(self.listbox.size()):
             self.recipe_format[self.listbox.get(i).replace(' ', '_').lower()] = i+1
-        for i in range(self.listbox_unused.size()):
-            self.recipe_format[self.listbox_unused.get(i).replace(' ', '_').lower()] = 0
+        for i in range(self.listbox.size_unused()):
+            self.recipe_format[self.listbox.get_unused(i).replace(' ', '_').lower()] = 0
 
         current_dir = os.getcwd()
         with open(os.path.join(current_dir,self.preference_file),"w") as f:

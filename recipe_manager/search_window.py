@@ -3,11 +3,11 @@ try:
 except ImportError:
     from tkinter import *
 
-class RecipeSearchWindow(Frame):
-    def __init__(self, master, root):
+class SearchWindow(Frame):
+    def __init__(self, master, root, type=None, objects="objects"):
         Frame.__init__(self, master)
         self.root = root
-        self.master.title("Search Recipe")
+        self.master.title("Search{}".format(" "+type if type else ""))
         self.master.maxsize(384,131)
         self.master.grid_rowconfigure(1, weight=1)
         self.master.grid_columnconfigure(1, weight=1)
@@ -15,7 +15,7 @@ class RecipeSearchWindow(Frame):
 
         self.final = None
 
-        self.name_label = Label(self.master, text="Find recipes with..").grid(row=0, column=0, columnspan=2, sticky=E)
+        self.name_label = Label(self.master, text="Find {} with..".format(objects)).grid(row=0, column=0, columnspan=2, sticky=E)
 
         self.all_label = Label(self.master, text="All of these terms:").grid(row=1, column=0, columnspan=2, sticky=E)
         self.all_text = Text(self.master, undo=True, height=1, width=32)
