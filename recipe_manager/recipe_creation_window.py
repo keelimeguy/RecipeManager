@@ -174,7 +174,18 @@ class RecipeCreationWindow(Frame):
         self.ingr_text.config(bg="white")
 
         try:
-            amount = float(self.ingr_amount.get("1.0", END))
+            str_amount = self.ingr_amount.get("1.0", END).strip()
+            if str_amount == "-":
+                str_amount = "0"
+            else:
+                for frac in [(.5, " 1/2"), (.25, " 1/4"), (.125, " 1/8"), (.333, " 1/3"), (.75, " 3/4"), (.0625, " 1/16"), (.666, " 2/3")]:
+                    if frac[1] in str_amount:
+                        str_amount = str_amount.replace(frac[1], str(frac[0])[1:]).replace(" ","")
+                        break
+                    if str_amount[:(len(frac[1])-1)] == frac[1].strip() and len(str_amount) == (len(frac[1])-1):
+                        str_amount = str_amount.replace(frac[1].strip(), str(frac[0])).strip()
+                        break
+            amount = float(str_amount)
         except ValueError as e:
             self.ingr_amount.config(bg="red")
             return

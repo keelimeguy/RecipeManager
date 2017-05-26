@@ -172,7 +172,15 @@ class RecipeViewWindow(Frame):
         row = 5
         self.ingr_label_list = []
         for i in ingredients:
-            self.ingr_label_list.append((Label(self.frame, text=i[0], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=40),
+            prec = 1e4
+            amount = (int(i[0]), int(float(i[0]) * prec) % prec / prec)
+            val = None
+            for frac in [(.5, "1/2"), (.25, "1/4"), (.125, "1/8"), (.333, "1/3"), (.3333, "1/3"), (.3334, "1/3"), (.75, "3/4"), (.0625, "1/16"), (.666, "2/3"), (.6666, "2/3"), (.6667, "2/3")]:
+                if amount[1]==frac[0]:
+                    val = "{}  {}".format(amount[0], frac[1]) if amount[0] else frac[1]
+            if i[0]==0:
+                val = "-"
+            self.ingr_label_list.append((Label(self.frame, text=(val if val else str(amount[0])), bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=40),
                 Label(self.frame, text=i[1], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8),
                 Label(self.frame, text=i[2], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8)))
             self.ingr_label_list[row-5][0].grid(row=row, column=0, sticky=W+N)

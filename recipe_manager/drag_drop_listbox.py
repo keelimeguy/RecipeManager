@@ -21,12 +21,16 @@ class DragDropListbox(Listbox):
         if self.fix_first and (i == 0 or self.curIndex == 0):
             return
         if i < self.curIndex:
-            x = self.get(i)
-            self.delete(i)
-            self.insert(i+1, x)
-            self.curIndex = i
+            while i < self.curIndex:
+                x = self.get(i)
+                self.delete(i)
+                i+=1
+                self.insert(i, x)
+            self.curIndex = i-1
         elif i > self.curIndex:
-            x = self.get(i)
-            self.delete(i)
-            self.insert(i-1, x)
-            self.curIndex = i
+            while i > self.curIndex:
+                x = self.get(i)
+                self.delete(i)
+                i-=1
+                self.insert(i, x)
+            self.curIndex = i+1
