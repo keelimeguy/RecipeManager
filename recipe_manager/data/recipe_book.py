@@ -125,14 +125,15 @@ class RecipeBook:
                 self.cursor.execute("""DELETE FROM RecipeIngredient WHERE recipe_id = ?""", [r_id])
         r_id = self.add_recipe(name, description, instructions, amount_yield, notes, prep_time, cook_time)
         order_num = None
-        if not len(ingredients[0])==4:
-            order_num = 1
-        for i in ingredients:
-            i_id = self.add_ingredient(i[2])
-            mu_id = self.add_measure(i[1])
-            self.add_recipe_ingredient(r_id, i_id, mu_id, i[0], order_num if order_num else i[3])
-            if order_num:
-                order_num+=1
+        if ingredients is not None and len(ingredients)>0:
+            if not len(ingredients[0])==4:
+                order_num = 1
+            for i in ingredients:
+                i_id = self.add_ingredient(i[2])
+                mu_id = self.add_measure(i[1])
+                self.add_recipe_ingredient(r_id, i_id, mu_id, i[0], order_num if order_num else i[3])
+                if order_num:
+                    order_num+=1
         return r_id
 
     def get(self, recipe_id):
@@ -215,6 +216,18 @@ class RecipeBook:
 
     def renumber(self):
         self.cursor.execute("""
+            SELECT i.id, (
+                SELECT COUNT(*)
+                FROM RecipeIngredient ri
+                WHERE ri.ingredient_id = i.id
+            )
+            FROM Ingredient i""")
+        results = self.cursor.fetchall()
+        for r in results:
+            if r[1]==0:
+                self.cursor.execute("""DELETE FROM Ingredient WHERE id = ?""", [r[0]])
+
+        self.cursor.execute("""
         CREATE TABLE Recipe_ (
             id INTEGER PRIMARY KEY,
             name VARCHAR(25),
@@ -227,11 +240,23 @@ class RecipeBook:
             UNIQUE(name));"""
         )
         self.cursor.execute("""
+            CREATE TABLE Ingredient_ (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(50),
+            UNIQUE(name));"""
+        )
+        self.cursor.execute("""
             ALTER TABLE Recipe
             RENAME TO Recipe_clone""")
         self.cursor.execute("""
             ALTER TABLE Recipe_
             RENAME TO Recipe""")
+        self.cursor.execute("""
+            ALTER TABLE Ingredient
+            RENAME TO Ingredient_clone""")
+        self.cursor.execute("""
+            ALTER TABLE Ingredient_
+            RENAME TO Ingredient""")
         self.cursor.execute("""
             SELECT *
             FROM Recipe_clone""")
@@ -251,8 +276,16 @@ class RecipeBook:
                 ingredients = []
                 for i in result:
                     ingredients.append(i)
-                self.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, True, [r[0]])
+                self.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, True)
+        self.cursor.execute("""
+            SELECT *
+            FROM Ingredient_clone""")
+        results = self.cursor.fetchall()
+        if results:
+            for r in results:
+                self.add_ingredient(r[1])
         self.cursor.execute("DROP TABLE Recipe_clone")
+        self.cursor.execute("DROP TABLE Ingredient_clone")
 
     def save(self):
         self.connection.commit()

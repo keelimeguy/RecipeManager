@@ -1,0 +1,23 @@
+Clicking on a recipe in a list will allow you to view its details. Press the left or right arrow buttons at the top of this recipe viewing mode (or use the left and right arrow keys on your keyboard) to cycle through the recipes from the list. You can edit recipes pressing the "Edit Recipe" button. Recipes are created when clicking the "Create Recipe" button from a recipe list or by changing the name of a recipe while editing.
+
+You should note that if you wish to change the name of a recipe you should delete the original recipe after editing. If you don't see the confirmation window for overwriting the recipe, then a new recipe was created and the original recipe was.
+
+While viewing recipes, if a paragraph would overflow the width of the screen, it will wrap to the following line instead. The program attempts to fit all recipes within the given window size. If the window was resized by the user, pressing the "Refresh" button near the top of the window will re-fit the recipe into the window.
+
+A recipe consists of these fields:
+- A name for the recipe
+- The amount of servings the recipe produces
+    This amount should be a positive integer. If the value is 0 then it will be replaced with "-" while viewing.
+- The estimated preparation time for the recipe
+    This prep time should be a positive real number or zero and is always measured in minutes.
+- The estimated cooking time for the recipe
+    This cook time should be a positive real number or zero and is always measured in minutes.
+- A description for the recipe
+- A list of ingredients for the recipe
+    The order of the ingredients in the list box during creation corresponds to the order they appear when viewing.
+- Directions for preparing the recipe
+    Typing "^o" (a carat followed by a lowercase 'O') will give you a quick temperature degree symbol.
+
+Adding Ingredients:
+
+To add an ingredient, fill in the amount, unit, and name fields then press the "+" button. Selecting an ingredient in the list and pressing "-" will remove that ingredient. The program will not allow you to add an ingredient when that ingredient name already exists in the list. If you wish to edit an ingredient already in the list you must remove it first.

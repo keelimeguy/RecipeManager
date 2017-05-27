@@ -3,7 +3,7 @@
 import unittest
 import os
 
-from recipe_manager.recipe_book import RecipeBook
+from recipe_manager.data.recipe_book import RecipeBook
 
 def table_info(book, table):
     book.cursor.execute("""

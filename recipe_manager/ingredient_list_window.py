@@ -7,9 +7,9 @@ import os
 import json
 
 if __debug__:
-    from recipe_book import RecipeBook
+    from data.recipe_book import RecipeBook
 else:
-    from recipe_manager.recipe_book import RecipeBook
+    from recipe_manager.data.recipe_book import RecipeBook
 from search_window import SearchWindow
 
 class IngredientListWindow(Frame):
@@ -128,18 +128,22 @@ class IngredientListWindow(Frame):
         self.orig_index_dict = {}
         index = 0
         for r in results:
-            self.id_list.append(r[0])
-            self.orig_index_dict[r[1]] = index
-            self.orig_index_list.append(index)
-            self.id_dict[r[1]] = r[0]
-            r = r[1:]
-            r_str = r[0]
-            if len(r)>1:
-                for i in range(len(r)-1):
-                    r_str+=(u"; {}".format(r[i+1]))
-            item = self.ingredient_list.insert(END, *(r))
-            index+=1
+            if r[2]==0:
+                book.cursor.execute("""DELETE FROM Ingredient WHERE id = ?""", [r[0]])
+            else:
+                self.id_list.append(r[0])
+                self.orig_index_dict[r[1]] = index
+                self.orig_index_list.append(index)
+                self.id_dict[r[1]] = r[0]
+                r = r[1:]
+                r_str = r[0]
+                if len(r)>1:
+                    for i in range(len(r)-1):
+                        r_str+=(u"; {}".format(r[i+1]))
+                item = self.ingredient_list.insert(END, *(r))
+                index+=1
         self.ingredient_list.yview(MOVETO, 0)
+        book.close(True)
 
     def adv_search(self, event=None):
         w = SearchWindow(Toplevel(self), self.root, "Ingredient", "ingredients")

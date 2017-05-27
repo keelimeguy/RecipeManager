@@ -5,7 +5,7 @@ except ImportError:
 import os
 import json
 
-from insertion_listbox import InsertionListbox
+from structure.insertion_listbox import InsertionListbox
 
 class RecipeFormatEditWindow(object):
 

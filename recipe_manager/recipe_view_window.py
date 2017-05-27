@@ -4,11 +4,11 @@ except ImportError:
     from tkinter import *
 
 if __debug__:
-    from recipe_book import RecipeBook
-    from modal_window import ModalWindow
+    from data.recipe_book import RecipeBook
+    from structure.modal_window import ModalWindow
 else:
-    from recipe_manager.recipe_book import RecipeBook
-    from recipe_manager.modal_window import ModalWindow
+    from recipe_manager.data.recipe_book import RecipeBook
+    from recipe_manager.structure.modal_window import ModalWindow
 from recipe_creation_window import RecipeCreationWindow
 
 class RecipeViewWindow(Frame):
@@ -92,7 +92,7 @@ class RecipeViewWindow(Frame):
         self.ingr_label_title.grid(row=4, column=0, columnspan=3, sticky=W)
         self.ingr_label_list = []
         row = 5
-        self.ingr_label_list.append((Label(self.frame, text="Amount", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=40),
+        self.ingr_label_list.append((Label(self.frame, text="Amount", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=80),
             Label(self.frame, text="Unit", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8),
             Label(self.frame, text="Ingredient", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8)))
         self.ingr_label_list[0][0].grid(row=row, column=0, sticky=W+N)
@@ -146,6 +146,8 @@ class RecipeViewWindow(Frame):
         description = recipe[0][2] if r_id and recipe[0] else "<Description>"
         directions = recipe[0][3] if r_id and recipe[0] else "<Directions>"
         servings = recipe[0][4] if r_id and recipe[0] else "<Servings>"
+        if r_id and recipe[0] and int(servings) == 0:
+            servings = "-"
         notes = recipe[0][5] if r_id and recipe[0] else "<Notes>"
         prep_time = recipe[0][6] if r_id and recipe[0] else "<Prep Time>"
         cook_time = recipe[0][7] if r_id and recipe[0] else "<Cook Time>"
@@ -172,15 +174,18 @@ class RecipeViewWindow(Frame):
         row = 5
         self.ingr_label_list = []
         for i in ingredients:
-            prec = 1e4
-            amount = (int(i[0]), int(float(i[0]) * prec) % prec / prec)
-            val = None
-            for frac in [(.5, "1/2"), (.25, "1/4"), (.125, "1/8"), (.333, "1/3"), (.3333, "1/3"), (.3334, "1/3"), (.75, "3/4"), (.0625, "1/16"), (.666, "2/3"), (.6666, "2/3"), (.6667, "2/3")]:
-                if amount[1]==frac[0]:
-                    val = "{}  {}".format(amount[0], frac[1]) if amount[0] else frac[1]
-            if i[0]==0:
-                val = "-"
-            self.ingr_label_list.append((Label(self.frame, text=(val if val else str(amount[0])), bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=40),
+            if r_id and recipe:
+                prec = 1e4
+                amount = (int(i[0]), int(float(i[0]) * prec) % prec / prec)
+                val = None
+                for frac in [(.5, "1/2"), (.25, "1/4"), (.125, "1/8"), (.333, "1/3"), (.3333, "1/3"), (.3334, "1/3"), (.75, "3/4"), (.0625, "1/16"), (.666, "2/3"), (.6666, "2/3"), (.6667, "2/3")]:
+                    if amount[1]==frac[0]:
+                        val = "{}  {}".format(amount[0], frac[1]) if amount[0] else frac[1]
+                if i[0]==0:
+                    val = "-"
+            else:
+                val = i[0]
+            self.ingr_label_list.append((Label(self.frame, text=(val if val else str(amount[0])), bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=80),
                 Label(self.frame, text=i[1], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8),
                 Label(self.frame, text=i[2], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8)))
             self.ingr_label_list[row-5][0].grid(row=row, column=0, sticky=W+N)

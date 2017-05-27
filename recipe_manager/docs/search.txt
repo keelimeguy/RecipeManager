@@ -1,0 +1,38 @@
+Certain lists are accompanied by a search bar, this means that the list can be narrowed down based on a search. Press the enter key after typing or press the search button to start a search. An empty search returns all recipes.
+
+All searches include the ability to search for multiple terms and various logical combinations of terms. This functionality is made user friendly in the advanced search window. The button labeled '..' (next to the search button) will open the advanced search window. Here you can enter your search terms in the logical fields separated by ', ' (a simple space without a comma will work as well). These search terms follow the same rules as in the normal search box, that is, you can still enter special notation if they exist.
+
+Advanced search takes advantage of the included logical term functionality. This allows terms using "|" (OR), "&" (AND), and "~" (NOT). You can find examples below.
+
+
+Special Notation - Recipes:
+
+    Recipes allow searching according to the values in the following fields:
+    - Name, Notes (default search when no special notation is detected)
+    - Ingredients (using "ingr" or "ingredient" followed by ':' and the desired search text)
+    - Yield (using "serve", "serves", "yield", or "yields" followed by a comparison symbol and a number)
+    - Prep Time (using "prep" or "prep_time" followed by a comparison symbol and a number)
+    - Cook Time (using "cook" or "cook_time" followed by a comparison symbol and a number)
+    Comparison symbols include ">", "<", ">=", "<=", and "="
+
+    Examples:
+        "toast"
+        "vegan"
+        "ingr:turnip"
+        "prep<10"
+        "cook=10"
+        "serves>=5"
+    Examples with logicals:
+        "vegan&~breakfast"   - will search all recipes with the word 'vegan' but without the word 'breakfast'
+        "toast|prep=0"   - will search all recipes that either contain the word 'toast' or have 0 prep time
+        "ingr:salt&~ingr:pepper"   - will search all recipes with 'salt' in their ingredient list but not 'pepper'
+
+
+Special Notation - Ingredients:
+
+    Ingredients allow searching according to the values in the following fields:
+    - Ingredients (by default or using "ingr" or "ingredient" followed by ':' and the desired search text)
+
+    Examples:
+        "bread"
+        "ingr:egg"

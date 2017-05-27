@@ -1,14 +1,15 @@
+# -*- coding: utf-8 -*-
 try:
     from Tkinter import *
 except ImportError:
     from tkinter import *
 
 if __debug__:
-    from recipe_book import RecipeBook
+    from data.recipe_book import RecipeBook
 else:
-    from recipe_manager.recipe_book import RecipeBook
-from modal_window import ModalWindow
-from drag_drop_listbox import DragDropListbox
+    from recipe_manager.data.recipe_book import RecipeBook
+from structure.modal_window import ModalWindow
+from structure.drag_drop_listbox import DragDropListbox
 
 class RecipeCreationWindow(Frame):
     def __init__(self, master, database, root, recipe=None):
@@ -170,9 +171,12 @@ class RecipeCreationWindow(Frame):
     def add_ingr(self):
         self.selected = False
         self.ingr_amount.focus()
+        self.name_text.config(bg="white")
+        self.serv_text.config(bg="white")
+        self.prep_text.config(bg="white")
+        self.cook_text.config(bg="white")
         self.ingr_amount.config(bg="white")
         self.ingr_text.config(bg="white")
-
         try:
             str_amount = self.ingr_amount.get("1.0", END).strip()
             if str_amount == "-":
@@ -191,7 +195,7 @@ class RecipeCreationWindow(Frame):
             return
 
         name = self.ingr_text.get("1.0", END).strip()
-        if name in self.ingr_dict:
+        if name in self.ingr_dict or len(name)==0:
             self.ingr_text.config(bg="red")
             self.ingr_text.focus()
             return
@@ -209,23 +213,39 @@ class RecipeCreationWindow(Frame):
             self.ingr_list.delete(i)
 
     def save_recipe(self):
+        self.name_text.config(bg="white")
         self.serv_text.config(bg="white")
         self.prep_text.config(bg="white")
         self.cook_text.config(bg="white")
+        self.ingr_amount.config(bg="white")
+        self.ingr_text.config(bg="white")
+        if len(self.name_text.get("1.0", END).strip())==0:
+            self.name_text.config(bg="red")
+            self.name_text.focus()
+            return
+        servings = self.serv_text.get("1.0", END)
+        if servings.strip() == "-":
+            servings = "0"
         try:
-            servings = int(self.serv_text.get("1.0", END))
+            servings = int(servings)
+            if servings < 0:
+                raise ValueError()
         except ValueError as e:
             self.serv_text.config(bg="red")
             self.serv_text.focus()
             return
         try:
             prep = float(self.prep_text.get("1.0", END))
+            if prep < 0:
+                raise ValueError()
         except ValueError as e:
             self.prep_text.config(bg="red")
             self.prep_text.focus()
             return
         try:
             cook = float(self.cook_text.get("1.0", END))
+            if cook < 0:
+                raise ValueError()
         except ValueError as e:
             self.cook_text.config(bg="red")
             self.cook_text.focus()
@@ -247,7 +267,7 @@ class RecipeCreationWindow(Frame):
             else:
                 book.close()
                 return
-        book.add(name, self.desc_text.get("1.0", END).strip(), self.inst_text.get("1.0", END).strip(),
+        book.add(name, self.desc_text.get("1.0", END).strip(), self.inst_text.get("1.0", END).strip().replace('^o', u'°'),
             servings, self.note_text.get("1.0", END).strip(), prep, cook, [(ingr[0], ingr[1].strip(), ingr[2].strip()) for ingr in self.ingr_list.get(0, END)], force)
         book.close(True)
         self.master.destroy()

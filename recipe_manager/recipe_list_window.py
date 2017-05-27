@@ -7,10 +7,10 @@ import os
 import json
 
 if __debug__:
-    from recipe_book import RecipeBook
+    from data.recipe_book import RecipeBook
     from recipe_creation_window import RecipeCreationWindow
 else:
-    from recipe_manager.recipe_book import RecipeBook
+    from recipe_manager.data.recipe_book import RecipeBook
     from recipe_manager.recipe_creation_window import RecipeCreationWindow
 from search_window import SearchWindow
 
@@ -142,7 +142,7 @@ class RecipeListWindow(Frame):
         book.cursor.execute("""
             SELECT r.id,{}
             FROM Recipe r
-            JOIN (SELECT ri.recipe_id as recipe_id, GROUP_CONCAT(ing.name) as name
+            LEFT JOIN (SELECT ri.recipe_id as recipe_id, GROUP_CONCAT(ing.name) as name
                 FROM RecipeIngredient ri
                 JOIN Ingredient ing on ing.id = ri.ingredient_id
                 GROUP BY ri.recipe_id) i on i.recipe_id = r.id{}
@@ -159,13 +159,15 @@ class RecipeListWindow(Frame):
             self.orig_index_dict[r[1]] = index
             self.orig_index_list.append(index)
             self.id_dict[r[1]] = r[0]
-            r = r[1:]
-            prep_index = self.recipe_format["prep_time"]
-            if prep_index > 0:
-                r = [(r[i] if i!=prep_index-1 else "{} min.".format(r[i])) for i in range(len(r))]
+            r = [r[i] for i in range(1, len(r))]
             cook_index = self.recipe_format["cook_time"]
-            if cook_index > 0:
-                r = [(r[i] if i!=cook_index-1 else "{} min.".format(r[i])) for i in range(len(r))]
+            prep_index = self.recipe_format["prep_time"]
+            serve_index = self.recipe_format["yield"]
+            for i in range(len(r)):
+                if cook_index > 0 and i==cook_index-1 or prep_index > 0 and i==prep_index-1:
+                    r[i] = "{} min.".format(r[i])
+                if serve_index > 0 and i==serve_index-1 and r[i] == 0:
+                    r[i] = "-"
             r_str = r[0]
             if len(r)>1:
                 for i in range(len(r)-1):
@@ -264,5 +266,7 @@ class RecipeListWindow(Frame):
                     joiner = " AND "
         self.populate(search_key)
         if sort_by:
-            self.sort_column(self.recipe_format[sort_by if sort_by in ["prep_time", "cook_time"] else "yield"]-1)
+            col = self.recipe_format[sort_by if sort_by in ["prep_time", "cook_time"] else "yield"]-1
+            if col >= 0:
+                self.sort_column(col)
         return "break"

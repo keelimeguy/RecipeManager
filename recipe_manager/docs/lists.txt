@@ -1,0 +1,5 @@
+Lists can be accessed via the "Lists" option in the menu bar.
+
+Recipe List
+
+The Ingredient List allows you to view all ingredients (unfinished)

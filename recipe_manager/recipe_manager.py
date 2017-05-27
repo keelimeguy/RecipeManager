@@ -10,22 +10,22 @@ import json
 
 if __debug__:
     print("debug")
-    from recipe_book import RecipeBook
-    from modal_window import ModalWindow
+    from data.recipe_book import RecipeBook
+    from structure.modal_window import ModalWindow
     from recipe_view_window import RecipeViewWindow
     from recipe_list_window import RecipeListWindow
     from ingredient_list_window import IngredientListWindow
-    from documentation_window import DocumentationWindow
-    from about_window import AboutWindow
+    from docs.documentation_window import DocumentationWindow
+    from docs.about_window import AboutWindow
     from recipe_format_edit_window import RecipeFormatEditWindow
 else:
-    from recipe_manager.recipe_book import RecipeBook
-    from recipe_manager.modal_window import ModalWindow
+    from recipe_manager.data.recipe_book import RecipeBook
+    from recipe_manager.structure.modal_window import ModalWindow
     from recipe_manager.recipe_view_window import RecipeViewWindow
     from recipe_manager.recipe_list_window import RecipeListWindow
     from recipe_manager.ingredient_list_window import IngredientListWindow
-    from recipe_manager.documentation_window import DocumentationWindow
-    from recipe_manager.about_window import AboutWindow
+    from recipe_manager.docs.documentation_window import DocumentationWindow
+    from recipe_manager.docs.about_window import AboutWindow
     from recipe_manager.recipe_format_edit_window import RecipeFormatEditWindow
 
 class RecipeManager():
@@ -91,8 +91,7 @@ class RecipeManager():
         self.my_gui = RecipeViewWindow(self.root, self.database, self, self.preference_file, index, id_list, search)
 
     def docs(self):
-        w = DocumentationWindow(self.root)
-        self.my_gui.wait_window(w.master)
+        DocumentationWindow(self.root)
 
     def about(self):
         w = AboutWindow(self.root)
