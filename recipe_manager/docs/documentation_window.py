@@ -3,10 +3,7 @@ try:
 except ImportError:
     from tkinter import *
 
-if __debug__:
-    import os
-else:
-    import pkgutil
+import os
 
 class DocumentationWindow(object):
 
@@ -66,11 +63,6 @@ class DocumentationWindow(object):
         self.doc_desc.grid(row = 1, column = 0, columnspan = 2, sticky=W)
         self.setup(self.options[0])
 
-        self.master.bind_all("<Up>", self.shift_up)
-        self.master.bind_all("<Down>", self.shift_down)
-        self.master.bind_all("<Left>", self.shift_left)
-        self.master.bind_all("<Right>", self.shift_right)
-
         self.master.focus()
 
     def on_select(self, event):
@@ -127,6 +119,9 @@ class DocumentationWindow(object):
                 with open(os.path.join(docs_dir, option[1]), 'r') as myfile:
                     data = myfile.read()
         else:
-            data = pkgutil.get_data("docs", option[1]).decode("utf-8", "ignore")
+            path = os.path.join(sys._MEIPASS, "docs")
+            if os.path.isfile(os.path.join(path, option[1])):
+                with open(os.path.join(path, option[1]), 'r') as myfile:
+                    data = myfile.read()
 
         self.doc_desc.config(text=data)

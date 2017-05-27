@@ -65,7 +65,7 @@ class IngredientListWindow(Frame):
 
     def on_select(self, event):
         if event>=0:
-            self.search = "ingr:{}".format(self.ingredient_list.get(event)[0][0])
+            self.search = "!ingr:{}".format(self.ingredient_list.get(event)[0][0])
             self.manager.browse()
 
     def sort_column_dbl(self, event):

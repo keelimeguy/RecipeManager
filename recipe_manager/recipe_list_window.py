@@ -121,7 +121,7 @@ class RecipeListWindow(Frame):
                     raise ValueError("Key \"name\" must have value \"1\" in {}".format(self.preference_file))
         del self.recipe_format["database"]
 
-    def populate(self, search=None):
+    def populate(self, search=None, grouped=True):
         self.load_json()
         self.recipe_list.delete(0, END)
         book = RecipeBook(self.database)
@@ -139,14 +139,23 @@ class RecipeListWindow(Frame):
         str_format = ','.join(formatting)
 
         search_format = " WHERE {}".format(search) if search!=None else ""
-        book.cursor.execute("""
-            SELECT r.id,{}
-            FROM Recipe r
-            LEFT JOIN (SELECT ri.recipe_id as recipe_id, GROUP_CONCAT(ing.name) as name
-                FROM RecipeIngredient ri
-                JOIN Ingredient ing on ing.id = ri.ingredient_id
-                GROUP BY ri.recipe_id) i on i.recipe_id = r.id{}
-            GROUP BY r.id""".format(str_format, search_format))
+        if grouped:
+            book.cursor.execute("""
+                SELECT r.id,{}
+                FROM Recipe r
+                LEFT JOIN (SELECT ri.recipe_id as recipe_id, GROUP_CONCAT(ing.name) as name
+                    FROM RecipeIngredient ri
+                    JOIN Ingredient ing on ing.id = ri.ingredient_id
+                    GROUP BY ri.recipe_id) i on i.recipe_id = r.id{}
+                GROUP BY r.id""".format(str_format, search_format))
+        else:
+            book.cursor.execute("""
+                SELECT r.id,{}
+                FROM Recipe r
+                LEFT JOIN (SELECT ri.recipe_id as recipe_id, ing.name as name
+                    FROM RecipeIngredient ri
+                    JOIN Ingredient ing on ing.id = ri.ingredient_id) i on i.recipe_id = r.id{}
+                GROUP BY r.id""".format(str_format, search_format))
         results = book.cursor.fetchall()
 
         self.id_list = []
@@ -211,6 +220,7 @@ class RecipeListWindow(Frame):
         self.search = search
         search_key = None
         sort_by = None
+        perfect = False
         for search_or in self.search.split("|"):
             # OR-ed terms
             joiner = " OR "
@@ -227,13 +237,27 @@ class RecipeListWindow(Frame):
                 searched = False
                 ingr_cond = None
 
-                for cond in ["ingr:", "ingredient:"]:
+                for cond in ["!ingr:", "!ingredient:"]:
                     if cond in search:
+                        searched = True
                         ingr_cond = cond
-                        break
-                if ingr_cond:
-                    search = search.split(ingr_cond)[1]
-                    key = ("i.name {} \'%{}%\'".format("NOT LIKE" if negate else "LIKE", search) if search else None)
+                        ingr_search = search.split(ingr_cond)[1]
+                        if self.search_text.get("1.0", END).strip() == cond+ingr_search:
+                            perfect = True
+                            ingr_search = ("{} \'{}\'".format("=", ingr_search) if ingr_search else None)
+                            break
+                if not ingr_cond:
+                    for cond in ["ingr:", "ingredient:"]:
+                        if cond in search:
+                            ingr_cond = cond
+                            ingr_search = search.split(ingr_cond)[1]
+                            ingr_like = "NOT LIKE" if negate else "LIKE"
+                            ingr_search = ("{} \'%{}%\'".format(ingr_like, ingr_search) if ingr_search else None)
+                            ingr_cond = None
+                            searched = True
+                            break
+                if perfect or searched and not ingr_cond:
+                    key = ("i.name {}".format(ingr_search) if ingr_search else None)
                     if key:
                         search_key = (joiner.join([search_key, key]) if search_key else key)
                         joiner = " AND "
@@ -256,7 +280,7 @@ class RecipeListWindow(Frame):
                                         joiner = " AND "
                                     sort_by = val
                                     searched = True
-                if not searched:
+                if not searched or searched and ingr_cond and not perfect:
                     like_term = ("NOT LIKE" if negate else "LIKE")
                     key = "(r.name {} \'%{}%\' {} r.notes {} \'%{}%\')".format(
                         like_term, search,
@@ -264,7 +288,7 @@ class RecipeListWindow(Frame):
                         like_term, search)
                     search_key = (joiner.join([search_key, key]) if search_key else key)
                     joiner = " AND "
-        self.populate(search_key)
+        self.populate(search_key, not perfect)
         if sort_by:
             col = self.recipe_format[sort_by if sort_by in ["prep_time", "cook_time"] else "yield"]-1
             if col >= 0:

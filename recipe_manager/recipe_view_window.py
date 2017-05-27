@@ -129,6 +129,8 @@ class RecipeViewWindow(Frame):
 
     def destroy(self):
         self.root.unbind("<Left>")
+        self.root.unbind("<Down>")
+        self.root.unbind("<Up>")
         self.root.unbind("<Right>")
         self.header.destroy()
         self.under_header.destroy()

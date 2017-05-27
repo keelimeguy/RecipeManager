@@ -1,5 +1,23 @@
-Lists can be accessed via the "Lists" option in the menu bar.
+The "Recipes" list is open automatically when the program first starts. Other lists can be accessed via the "Lists" option in the menu bar.
 
-Recipe List
+You can open an element of a list by double clicking on the element. In the "Recipes" list, opening a recipe allows you to view that entire recipe in a neat format. In the "Ingredients" list, opening an ingredient will bring you to the recipe list with a search entry for that ingredient.
 
-The Ingredient List allows you to view all ingredients (unfinished)
+
+Columns:
+
+    Clicking a column header within a list will sort the data according to that column. The sizes of columns can be
+    adjusted by dragging the separator between columns, double clicking the separator will automatically resize the
+    column to fit the width of its data.
+
+    Columns in the "Recipes" list can be defined by the user. To define the format for columns in the recipe list,
+    select the associated option under the "Preferences" menu bar option. This will open a new menu where you can add
+    and reorder desired column headers. To enable a column header select it in the left list box and press the ">"
+    button. To disable an option select it in the right list box and press the "<" button. The order of the column
+    headers in the right list box corresponds to the order the columns are listed in the recipe list. The "Name" column
+    is fixed in the first position and cannot be disabled. Notice that the existence of a column in the recipe list
+    does not correspond to an ability to search acording to that column. For example, enabling the "Description" column
+    header does not mean that you can search according to that field in the search bar. Additionally, disabling the
+    "Prep Time" column header does not remove the ability to search according to that field. See the "Searching"
+    section for more info on the search bar.
+
+    The "Ingredients" list has two columns, the ingredient name and the number of recipes which use that ingredient.

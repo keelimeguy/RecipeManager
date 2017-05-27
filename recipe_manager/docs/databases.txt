@@ -1,3 +1,3 @@
 All your recipes are stored within database (.db) files. This program allows you to manage different recipe books in any number of database files. You can load one of these recipe books by clicking "Load" under the "File" option in the menu bar. You can also import or export all recipes in the current recipe book into other existing recipe books from the "File" submenu.
 
-The default recipe book, which opens at startup, can be changed by selecting the appropriate option under the "Preferences" menu option. If this default book is not found at all during use (by user deletion for example), then it will be created as an empty recipe book at that location.
+The default recipe book, which opens at startup, can be changed by selecting the appropriate option under the "Preferences" menu bar option. If this default book is not found at all during use (by user deletion for example), then it will be created as an empty recipe book at that location.
