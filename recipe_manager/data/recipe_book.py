@@ -35,6 +35,14 @@ class RecipeBook:
         self.cursor.execute("DROP TABLE IF EXISTS Ingredient")
         self.cursor.execute("DROP TABLE IF EXISTS Measure")
         self.cursor.execute("DROP TABLE IF EXISTS RecipeIngredient")
+        self.cursor.execute("DROP TABLE IF EXISTS Recipe_")
+        self.cursor.execute("DROP TABLE IF EXISTS Ingredient_")
+        self.cursor.execute("DROP TABLE IF EXISTS Measure_")
+        self.cursor.execute("DROP TABLE IF EXISTS RecipeIngredient_")
+        self.cursor.execute("DROP TABLE IF EXISTS Recipe_clone")
+        self.cursor.execute("DROP TABLE IF EXISTS Ingredient_clone")
+        self.cursor.execute("DROP TABLE IF EXISTS Measure_clone")
+        self.cursor.execute("DROP TABLE IF EXISTS RecipeIngredient_clone")
         self.close()
         self.__init__(self.database)
 
@@ -228,35 +236,95 @@ class RecipeBook:
                 self.cursor.execute("""DELETE FROM Ingredient WHERE id = ?""", [r[0]])
 
         self.cursor.execute("""
-        CREATE TABLE Recipe_ (
-            id INTEGER PRIMARY KEY,
-            name VARCHAR(25),
-            description VARCHAR(50),
-            instructions VARCHAR(500),
-            yield Integer,
-            notes VARCHAR(100),
-            prep_time Integer,
-            cook_time Integer,
-            UNIQUE(name));"""
+            SELECT mu.id, (
+                SELECT COUNT(*)
+                FROM RecipeIngredient ri
+                WHERE ri.measure_id = mu.id
+            )
+            FROM Measure mu""")
+        results = self.cursor.fetchall()
+        for r in results:
+            if r[1]==0:
+                self.cursor.execute("""DELETE FROM Measure WHERE id = ?""", [r[0]])
+
+        self.cursor.execute("""
+            CREATE TABLE Recipe_ (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(25),
+                description VARCHAR(50),
+                instructions VARCHAR(500),
+                yield Integer,
+                notes VARCHAR(100),
+                prep_time Integer,
+                cook_time Integer,
+                UNIQUE(name));"""
+        )
+        self.cursor.execute("""
+            CREATE TABLE RecipeIngredient_ (
+                recipe_id INTEGER,
+                ingredient_id INTEGER,
+                measure_id INTEGER,
+                amount REAL,
+                order_num INTEGER,
+                CONSTRAINT fk_recipe FOREIGN KEY(recipe_id) REFERENCES Recipe(id),
+                CONSTRAINT fk_ingredient FOREIGN KEY(ingredient_id) REFERENCES Ingredient(id),
+                CONSTRAINT fk_measure FOREIGN KEY(measure_id) REFERENCES Measure(id)
+                UNIQUE(recipe_id, ingredient_id));"""
         )
         self.cursor.execute("""
             CREATE TABLE Ingredient_ (
-            id INTEGER PRIMARY KEY,
-            name VARCHAR(50),
-            UNIQUE(name));"""
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(50),
+                UNIQUE(name));"""
+        )
+        self.cursor.execute("""
+            CREATE TABLE Measure_ (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(30),
+                UNIQUE(name));"""
         )
         self.cursor.execute("""
             ALTER TABLE Recipe
-            RENAME TO Recipe_clone""")
+                RENAME TO Recipe_clone""")
         self.cursor.execute("""
             ALTER TABLE Recipe_
-            RENAME TO Recipe""")
+                RENAME TO Recipe""")
+        self.cursor.execute("""
+            ALTER TABLE RecipeIngredient
+                RENAME TO RecipeIngredient_clone""")
+        self.cursor.execute("""
+            ALTER TABLE RecipeIngredient_
+                RENAME TO RecipeIngredient""")
         self.cursor.execute("""
             ALTER TABLE Ingredient
-            RENAME TO Ingredient_clone""")
+                RENAME TO Ingredient_clone""")
         self.cursor.execute("""
             ALTER TABLE Ingredient_
-            RENAME TO Ingredient""")
+                RENAME TO Ingredient""")
+        self.cursor.execute("""
+            ALTER TABLE Measure
+                RENAME TO Measure_clone""")
+        self.cursor.execute("""
+            ALTER TABLE Measure_
+                RENAME TO Measure""")
+
+        self.cursor.execute("""DELETE FROM RecipeIngredient WHERE 1=1""")
+
+        self.cursor.execute("""
+            SELECT *
+            FROM Ingredient_clone""")
+        results = self.cursor.fetchall()
+        if results:
+            for r in results:
+                self.add_ingredient(r[1])
+        self.cursor.execute("""
+            SELECT *
+            FROM Measure_clone""")
+        results = self.cursor.fetchall()
+        if results:
+            for r in results:
+                self.add_measure(r[1])
+
         self.cursor.execute("""
             SELECT *
             FROM Recipe_clone""")
@@ -269,23 +337,18 @@ class RecipeBook:
                     i.name AS 'Ingredient',
                     ri.order_num AS 'Order'
                     FROM Recipe_clone r
-                    JOIN RecipeIngredient ri on r.id = ri.recipe_id
-                    JOIN Ingredient i on i.id = ri.ingredient_id
-                    LEFT OUTER JOIN Measure mu on mu.id = measure_id
+                    JOIN RecipeIngredient_clone ri on r.id = ri.recipe_id
+                    JOIN Ingredient_clone i on i.id = ri.ingredient_id
+                    LEFT OUTER JOIN Measure_clone mu on mu.id = ri.measure_id
                     WHERE r.id = ?""", [r[0]])
                 ingredients = []
                 for i in result:
-                    ingredients.append(i)
+                    ingredients.append((i))
                 self.add(r[1], r[2], r[3], r[4], r[5], r[6], r[7], ingredients, True)
-        self.cursor.execute("""
-            SELECT *
-            FROM Ingredient_clone""")
-        results = self.cursor.fetchall()
-        if results:
-            for r in results:
-                self.add_ingredient(r[1])
         self.cursor.execute("DROP TABLE Recipe_clone")
+        self.cursor.execute("DROP TABLE RecipeIngredient_clone")
         self.cursor.execute("DROP TABLE Ingredient_clone")
+        self.cursor.execute("DROP TABLE Measure_clone")
 
     def save(self):
         self.connection.commit()

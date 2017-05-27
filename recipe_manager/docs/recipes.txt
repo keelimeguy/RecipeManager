@@ -18,6 +18,25 @@ A recipe consists of these fields:
 - Directions for preparing the recipe
     Typing "^o" (a carat followed by a lowercase 'O') will give you a quick temperature degree symbol.
 
+Invalid fields will fail the recipe submission and be highlighted red to indicate an error.
+
+
 Adding Ingredients:
 
-To add an ingredient, fill in the amount, unit, and name fields then press the "+" button. Selecting an ingredient in the list and pressing "-" will remove that ingredient. The program will not allow you to add an ingredient when that ingredient name already exists in the list. If you wish to edit an ingredient already in the list you must remove it first.
+    To add an ingredient, fill in the amount, unit, and name fields then press the "+" button. Selecting an ingredient
+    in the list and pressing "-" will remove that ingredient. The program will mark an error while adding an ingredient
+    that already exists in the list. If you wish to edit an ingredient already in the list you must remove it first.
+
+    Selecting an ingredient will auto fill the input fields with the information for that ingredient. Be aware that this will overwrite any info that was previously typed into the fields. When an ingredient was not added due to an error, shown by a red highlighted region in the input fields, then selecting an ingredient in the list will not overwrite the field. An example use of this feature is the following:
+        - select an ingredient, to edit
+        - edit the unit or amount in the input fields
+        - attempt to add th editied ingredient by pressing "+" creating an error as the ingredient already exists
+        - select the conflicting ingredient in the list, the input fields will not be overwritten due to the last error
+        - add the edited ingredient to the list by pressing "+"
+
+    You may enter fractional amounts like "3/4" or "1 1/2" and the program will be able to parse them. Not all
+    fractions are supported, but common measurement values are.
+
+    Pressing tab while in one of the fields will move you to the next field. Pressing space while a button is
+    highlighted will activate that button. Using these keyboard shortcuts may make it easier to add recipes quickly,
+    compared to selecting fields using the mouse.

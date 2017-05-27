@@ -149,15 +149,17 @@ class RecipeCreationWindow(Frame):
         return "break"
 
     def on_select(self, event):
-        if event.widget == self.ingr_amount or event.widget == self.ingr_unit or event.widget == self.ingr_text:
+        if (event.widget == self.ingr_amount or event.widget == self.ingr_unit
+                or event.widget == self.ingr_text or event.widget == self.ingr_list):
             if self.ingr_amount.get("1.0", END).strip() == "<#>":
                 self.ingr_amount.delete("1.0", END)
             if self.ingr_unit.get("1.0", END).strip() == "<unit>":
                 self.ingr_unit.delete("1.0", END)
             if self.ingr_text.get("1.0", END).strip() == "<name>":
                 self.ingr_text.delete("1.0", END)
-        elif event.widget == self.ingr_list:
-            if len(self.ingr_amount.get("1.0", END).strip()) == 0 and len(self.ingr_unit.get("1.0", END).strip()) == 0 and len(self.ingr_text.get("1.0", END).strip()) == 0 and len(self.ingr_list.curselection())>0 or self.selected:
+        if event.widget == self.ingr_list:
+            if (len(self.ingr_amount.get("1.0", END).strip()) == 0 and len(self.ingr_unit.get("1.0", END).strip()) == 0
+                    and len(self.ingr_text.get("1.0", END).strip()) == 0 and len(self.ingr_list.curselection())>0 or self.selected):
                 self.selected = True
                 entry = self.ingr_list.get(self.ingr_list.curselection()[0])
                 self.ingr_text.delete("1.0", END)
