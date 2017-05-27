@@ -8,7 +8,7 @@ class SearchWindow(Frame):
         Frame.__init__(self, master)
         self.root = root
         self.master.title("Search{}".format(" "+type if type else ""))
-        self.master.maxsize(384,131)
+        self.master.resizable(False, False)
         self.master.grid_rowconfigure(1, weight=1)
         self.master.grid_columnconfigure(1, weight=1)
         self.master.grab_set()

@@ -5,11 +5,16 @@ try:
     import tkFileDialog
 except ImportError:
     from tkinter import *
-import os
+from sys import platform as __platform__
 import json
+import os
 
 if __debug__:
     print("debug")
+    if __platform__ == "win32":
+        print("windows")
+    elif __platform__ == "darwin":
+        print("mac")    
     from data.recipe_book import RecipeBook
     from structure.modal_window import ModalWindow
     from recipe_view_window import RecipeViewWindow

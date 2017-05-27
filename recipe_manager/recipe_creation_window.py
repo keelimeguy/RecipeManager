@@ -13,9 +13,9 @@ from structure.drag_drop_listbox import DragDropListbox
 
 class RecipeCreationWindow(Frame):
     def __init__(self, master, database, root, recipe=None):
-        Frame.__init__(self, master)
+        Frame.__init__(self, master, bg='gray95')
         self.root = root
-        self.master.maxsize(419,438)
+        self.master.resizable(False, False)
         self.master.title("Create Recipe")
         self.master.grid_rowconfigure(1, weight=1)
         self.master.grid_columnconfigure(1, weight=1)
@@ -25,8 +25,8 @@ class RecipeCreationWindow(Frame):
         self.old_id = None
         self.final = None
 
-        self.name_label = Label(self.master, text="Name:").grid(row=0, column=0, columnspan=2, sticky=E)
-        self.name_text = Text(self.master, height=1, width=32)
+        self.name_label = Label(self.master, text="Name:", bg='gray95').grid(row=0, column=0, columnspan=2, sticky=E)
+        self.name_text = Text(self.master, height=1, width=32, highlightbackground='black', bd=1)
         self.name_text.grid(row=0, column=2, columnspan=7, sticky=NSEW)
         self.name_text.bind('<Tab>', self.on_text_tab)
         self.name_text.bind('<Return>', self.on_text_tab)

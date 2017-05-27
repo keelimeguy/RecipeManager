@@ -3,6 +3,9 @@
 !/**/
 !*.*
 
+#Mac OS files
+*.DS_Store
+
 # Database stuff
 *.db
 *.json
