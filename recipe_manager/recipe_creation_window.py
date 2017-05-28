@@ -10,50 +10,52 @@ else:
     from recipe_manager.data.recipe_book import RecipeBook
 from structure.modal_window import ModalWindow
 from structure.drag_drop_listbox import DragDropListbox
+from structure.color_scheme import *
 
 class RecipeCreationWindow(Frame):
     def __init__(self, master, database, root, recipe=None):
-        Frame.__init__(self, master, bg='gray95')
+        Frame.__init__(self, master)
         self.root = root
         self.master.resizable(False, False)
         self.master.title("Create Recipe")
         self.master.grid_rowconfigure(1, weight=1)
         self.master.grid_columnconfigure(1, weight=1)
+        self.master.config(bg=BG_COLOR)
 
         self.selected = False
         self.database = database
         self.old_id = None
         self.final = None
 
-        self.name_label = Label(self.master, text="Name:", bg='gray95').grid(row=0, column=0, columnspan=2, sticky=E)
+        self.name_label = Label(self.master, text="Name:", bg=BG_COLOR).grid(row=0, column=0, columnspan=2, sticky=E)
         self.name_text = Text(self.master, height=1, width=32, highlightbackground='black', bd=1)
         self.name_text.grid(row=0, column=2, columnspan=7, sticky=NSEW)
         self.name_text.bind('<Tab>', self.on_text_tab)
         self.name_text.bind('<Return>', self.on_text_tab)
 
-        self.serv_label = Label(self.master, text="Serves:").grid(row=0, column=9, sticky=E)
+        self.serv_label = Label(self.master, text="Serves:", bg=BG_COLOR).grid(row=0, column=9, sticky=E)
         self.serv_text = Text(self.master, undo=True, height=1, width=4)
         self.serv_text.grid(row=0, column=11, columnspan=2, sticky=NSEW)
         self.serv_text.bind('<Tab>', self.on_text_tab)
         self.serv_text.bind('<Return>', self.on_text_tab)
 
-        self.prep_label = Label(self.master, text="Prep Time:").grid(row=1, column=2, sticky=E)
+        self.prep_label = Label(self.master, text="Prep Time:", bg=BG_COLOR).grid(row=1, column=2, sticky=E)
         self.prep_text = Text(self.master, undo=True, height=1, width=4)
         self.prep_text.grid(row=1, column=3, sticky=NSEW)
         self.prep_text.bind('<Tab>', self.on_text_tab)
         self.prep_text.bind('<Return>', self.on_text_tab)
-        self.prep_unit_label = Label(self.master, text="min.").grid(row=1, column=4, sticky=E)
+        self.prep_unit_label = Label(self.master, text="min.", bg=BG_COLOR).grid(row=1, column=4, sticky=E)
 
-        Label(self.master, text="").grid(row=1, column=5, sticky=EW)
+        Label(self.master, text="", bg=BG_COLOR).grid(row=1, column=5, sticky=EW)
 
-        self.cook_label = Label(self.master, text="Cook Time:").grid(row=1, column=6, sticky=E)
+        self.cook_label = Label(self.master, text="Cook Time:", bg=BG_COLOR).grid(row=1, column=6, sticky=E)
         self.cook_text = Text(self.master, undo=True, height=1, width=4)
         self.cook_text.grid(row=1, column=7, sticky=NSEW)
         self.cook_text.bind('<Tab>', self.on_text_tab)
         self.cook_text.bind('<Return>', self.on_text_tab)
-        self.cook_unit_label = Label(self.master, text="min.").grid(row=1, column=8, sticky=E)
+        self.cook_unit_label = Label(self.master, text="min.", bg=BG_COLOR).grid(row=1, column=8, sticky=E)
 
-        self.desc_label = Label(self.master, text="Description:").grid(row=5, column=0, columnspan=2, sticky=E)
+        self.desc_label = Label(self.master, text="Description:", bg=BG_COLOR).grid(row=5, column=0, columnspan=2, sticky=E)
         self.desc_scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.desc_scrollbar.grid(row=6, column=12, columnspan=1, sticky=W)
         self.desc_text = Text(self.master, undo=True, height=2, width=32)
@@ -62,7 +64,7 @@ class RecipeCreationWindow(Frame):
         self.desc_text.config(yscrollcommand=self.desc_scrollbar.set)
         self.desc_scrollbar.config(command=self.desc_text.yview)
 
-        self.ingr_label = Label(self.master, text="Ingredients:").grid(row=7, column=0, columnspan=2, sticky=E)
+        self.ingr_label = Label(self.master, text="Ingredients:", bg=BG_COLOR).grid(row=7, column=0, columnspan=2, sticky=E)
         self.ingr_scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.ingr_scrollbar.grid(row=8, column=12, columnspan=1, sticky=W)
         self.ingr_list = DragDropListbox(self.master, fix_first=False, height=4, width=32)
@@ -94,7 +96,7 @@ class RecipeCreationWindow(Frame):
         self.ingr_add_button = Button(self.master, text="-", command=self.rem_ingr).grid(row=9, column=12, sticky=EW)
         self.ingr_dict = {}
 
-        self.inst_label = Label(self.master, text="Instructions:").grid(row=10, column=0, columnspan=2, sticky=E)
+        self.inst_label = Label(self.master, text="Instructions:", bg=BG_COLOR).grid(row=10, column=0, columnspan=2, sticky=E)
         self.inst_scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.inst_scrollbar.grid(row=11, column=12, columnspan=1, sticky=W)
         self.inst_text = Text(self.master, undo=True, height=4, width=32)
@@ -103,7 +105,7 @@ class RecipeCreationWindow(Frame):
         self.inst_text.bind('<Tab>', self.on_text_tab)
         self.inst_scrollbar.config(command=self.inst_text.yview)
 
-        self.note_label = Label(self.master, text="Notes:").grid(row=12, column=0, columnspan=2, sticky=E)
+        self.note_label = Label(self.master, text="Notes:", bg=BG_COLOR).grid(row=12, column=0, columnspan=2, sticky=E)
         self.note_scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.note_scrollbar.grid(row=13, column=12, columnspan=1, sticky=W)
         self.note_text = Text(self.master, undo=True, height=3, width=32)
@@ -112,7 +114,7 @@ class RecipeCreationWindow(Frame):
         self.note_text.bind('<Tab>', self.on_text_tab)
         self.note_scrollbar.config(command=self.note_text.yview)
 
-        Label(self.master, text="").grid(row=14, column=0)
+        Label(self.master, text="", bg=BG_COLOR).grid(row=14, column=0)
 
         self.save_button = Button(self.master, text="Save", command=self.save_recipe)
         self.save_button.grid(row=15, column=2, columnspan=9, sticky=EW)

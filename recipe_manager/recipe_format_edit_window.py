@@ -5,6 +5,7 @@ except ImportError:
 import os
 import json
 
+from structure.color_scheme import *
 from structure.insertion_listbox import InsertionListbox
 
 class RecipeFormatEditWindow(object):
@@ -14,11 +15,12 @@ class RecipeFormatEditWindow(object):
         self.master = Toplevel(root)
         self.master.title("Edit Recipe Format")
         self.master.resizable(False, False)
+        self.master.config(bg=BG_COLOR)
 
         self.preference_file = preference_file
 
         # Setup the widgets in the window
-        label = Label(self.master, text="Add entries to the right side then drag and drop them into the desired order.", justify=LEFT)
+        label = Label(self.master, text="Add entries to the right side then drag and drop them into the desired order.", justify=LEFT, bg=BG_COLOR)
         label.grid(row = 0, column = 0, columnspan = 4, sticky=W)
 
         self.listbox = InsertionListbox(self.master, True)

@@ -10,32 +10,34 @@ if __debug__:
     from data.recipe_book import RecipeBook
 else:
     from recipe_manager.data.recipe_book import RecipeBook
+from structure.color_scheme import *
 from search_window import SearchWindow
 
 class IngredientListWindow(Frame):
     def __init__(self, root, database, manager, search=None):
         Frame.__init__(self, root)
         self.root = root
-        self.header = Frame(root)
+        self.header = Frame(root, bg=BG_COLOR)
         self.header.pack(fill=BOTH)
-        self.window = Frame(root)
+        self.window = Frame(root, bg=BG_COLOR)
         self.window.pack(fill=BOTH, expand=YES)
-        self.footer = Frame(root)
+        self.footer = Frame(root, bg=BG_COLOR)
         self.footer.pack(fill=BOTH)
+
+        self.search_button = Button(self.header, text="..", command=self.adv_search)
+        self.search_button.pack(side=RIGHT)
+        self.search_button = Button(self.header, text="Search", command=self.search_ingredient)
+        self.search_button.pack(side=RIGHT)
 
         self.search_text = Text(self.header, width=16, height=1)
         self.search_text.bind('<Return>', self.search_ingredient)
-        self.search_text.pack(side=LEFT, fill=X, expand=YES)
-        self.search_button = Button(self.header, text="Search", command=self.search_ingredient)
-        self.search_button.pack(side=LEFT)
-
-        self.search_button = Button(self.header, text="..", command=self.adv_search)
-        self.search_button.pack(side=LEFT)
+        self.search_text.pack(side=RIGHT, fill=X, expand=YES)
+        Label(self.header, text="", width=1, bg=BG_COLOR).pack(side=RIGHT)
 
         self.manager = manager
         self.database = database
 
-        self.ingredient_list = MultiListbox(self.window, command=self.on_select, headerfont=("Times", 11, "bold"))
+        self.ingredient_list = MultiListbox(self.window, command=self.on_select, height=400, width=400, headerfont=("Times", 11, "bold"))
         self.ingredient_list.bind("<Button-1>", self.sort_column_sngl)
         self.ingredient_list.bind("<Double-1>", self.sort_column_dbl)
         self.ingredient_list.pack(fill=BOTH, expand=YES, side=LEFT)

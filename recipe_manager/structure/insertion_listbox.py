@@ -4,10 +4,11 @@ except ImportError:
     from tkinter import *
 
 from drag_drop_listbox import DragDropListbox
+from color_scheme import *
 
 class InsertionListbox(DragDropListbox):
     def __init__(self, master, fix_first=False, reorder=True, **kw):
-        self.master = Frame(master)
+        self.master = Frame(master, bg=BG_COLOR)
         self.listbox_unused = Listbox(self.master)
         self.listbox_unused.grid(row = 1, column = 0, rowspan=6, sticky=EW)
 

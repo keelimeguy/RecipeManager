@@ -3,7 +3,9 @@ try:
 except ImportError:
     from tkinter import *
 
-version = '0.6.4'
+from ..structure.color_scheme import *
+
+version = '0.6.5'
 
 class AboutWindow(object):
 
@@ -12,9 +14,10 @@ class AboutWindow(object):
         self.master = Toplevel(root)
         self.master.title("About")
         self.master.resizable(False, False)
+        self.master.config(bg=BG_COLOR)
 
         # Setup the widgets in the window
-        label = Label(self.master, text=self.get_text(), justify=LEFT)
+        label = Label(self.master, text=self.get_text(), justify=LEFT, bg=BG_COLOR)
         label.grid(row = 1, column = 0, columnspan = 2, sticky=W)
 
         self.master.grab_set()

@@ -14,7 +14,7 @@ if __debug__:
     if __platform__ == "win32":
         print("windows")
     elif __platform__ == "darwin":
-        print("mac")    
+        print("mac")
     from data.recipe_book import RecipeBook
     from structure.modal_window import ModalWindow
     from recipe_view_window import RecipeViewWindow
@@ -35,8 +35,10 @@ else:
 
 class RecipeManager():
     def __init__(self, root, database, preference_file):
+        self.is_wind = (__platform__ == "win32")
         self.root = root
         self.root.title("Recipe Manager")
+        self.root.geometry('500x500')
         self.preference_file = preference_file
         self.database = database
 
@@ -74,6 +76,7 @@ class RecipeManager():
         self.root.config(menu=self.menubar)
 
         self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
+        self.my_gui.focus()
         root.mainloop()
 
     def fresh_browse(self):

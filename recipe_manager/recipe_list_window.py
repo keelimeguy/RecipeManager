@@ -12,36 +12,41 @@ if __debug__:
 else:
     from recipe_manager.data.recipe_book import RecipeBook
     from recipe_manager.recipe_creation_window import RecipeCreationWindow
+from structure.color_scheme import *
 from search_window import SearchWindow
 
 class RecipeListWindow(Frame):
     def __init__(self, root, database, manager, preference_file, search=None):
         Frame.__init__(self, root)
         self.root = root
-        self.header = Frame(root)
+        self.header = Frame(root, bg=BG_COLOR)
         self.header.pack(fill=BOTH)
-        self.window = Frame(root)
+        self.window = Frame(root, bg=BG_COLOR)
         self.window.pack(fill=BOTH, expand=YES)
-        self.footer = Frame(root)
+        self.footer = Frame(root, bg=BG_COLOR)
         self.footer.pack(fill=BOTH)
         self.preference_file = preference_file
 
-        self.button_create = Button(self.header, text="New Recipe", command=self.create_recipe)
-        self.button_create.pack(side=LEFT)
-        Label(self.header, text="", width=10).pack(side=LEFT)
+        self.search_button = Button(self.header, text="..", command=self.adv_search)
+        self.search_button.pack(side=RIGHT)
+        self.search_button = Button(self.header, text="Search", command=self.search_recipe)
+        self.search_button.pack(side=RIGHT)
+
         self.search_text = Text(self.header, width=16, height=1)
         self.search_text.bind('<Return>', self.search_recipe)
-        self.search_text.pack(side=LEFT, fill=X, expand=YES)
-        self.search_button = Button(self.header, text="Search", command=self.search_recipe)
-        self.search_button.pack(side=LEFT)
+        self.search_text.pack(side=RIGHT, fill=X, expand=YES)
+        Label(self.header, text="", width=2, bg=BG_COLOR).pack(side=RIGHT)
 
-        self.search_button = Button(self.header, text="..", command=self.adv_search)
-        self.search_button.pack(side=LEFT)
+        self.button_create = Button(self.header, text="New Recipe", command=self.create_recipe)
+        self.button_create.pack(side=RIGHT)
 
         self.manager = manager
         self.database = database
 
-        self.recipe_list = MultiListbox(self.window, command=self.on_select, headerfont=("Times", 11, "bold"))
+        if self.manager.is_wind:
+            self.recipe_list = MultiListbox(self.window, command=self.on_select, headerfont=("Times", 11, "bold"))
+        else:
+            self.recipe_list = MultiListbox(self.window, command=self.on_select)
         self.recipe_list.bind("<Button-1>", self.sort_column_sngl)
         self.recipe_list.bind("<Double-1>", self.sort_column_dbl)
         self.recipe_list.pack(fill=BOTH, expand=YES, side=LEFT)
@@ -131,11 +136,11 @@ class RecipeListWindow(Frame):
             if v > 0:
                 formatting.append("r."+k.replace(' ', ''))
                 columns.append(k.replace(' ', '').replace('_', ' ').title())
+        self.recipe_list.column_config(0, width=180)
         self.recipe_list.config(columns=columns)
         self.sort_dict = []
         for col in range(len(columns)):
             self.sort_dict.append('decreasing')
-        self.recipe_list.column_config(0, width=180)
         str_format = ','.join(formatting)
 
         search_format = " WHERE {}".format(search) if search!=None else ""

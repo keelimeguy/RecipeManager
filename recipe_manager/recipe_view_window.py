@@ -10,16 +10,17 @@ else:
     from recipe_manager.data.recipe_book import RecipeBook
     from recipe_manager.structure.modal_window import ModalWindow
 from recipe_creation_window import RecipeCreationWindow
+from structure.color_scheme import *
 
 class RecipeViewWindow(Frame):
     def __init__(self, root, database, manager, preferences, index=0, id_list=None, search=None):
         Frame.__init__(self, root)
         self.manager = manager
         self.root = root
-        self.header = Frame(root)
-        self.under_header = Frame(root)
-        self.window = Frame(self.under_header)
-        self.footer = Frame(self.under_header)
+        self.header = Frame(root, bg=BG_COLOR)
+        self.under_header = Frame(root, bg=BG_COLOR)
+        self.window = Frame(self.under_header, bg=BG_COLOR)
+        self.footer = Frame(self.under_header, bg=BG_COLOR)
         self.header.pack(fill=BOTH)
         self.under_header.pack(fill=BOTH, expand=YES)
         self.footer.pack(fill=BOTH, side=BOTTOM)
@@ -63,8 +64,8 @@ class RecipeViewWindow(Frame):
         self.canvas.pack(fill=BOTH, expand=YES, side=RIGHT)
         self.hsb.pack(fill=BOTH)
 
-        self.canvas_width = self.canvas.winfo_reqwidth() - 4
-        self.canvas_height = self.canvas.winfo_reqheight() - 4
+        self.canvas_width = ((self.canvas.winfo_reqwidth() - 4) if self.manager.is_wind else (self.canvas.winfo_reqwidth() - 6))
+        self.canvas_height = ((self.canvas.winfo_reqheight() - 4) if self.manager.is_wind else (self.canvas.winfo_reqheight() - 6))
 
         self.frame = Frame(self.canvas, background="#ffffff", width=self.canvas_width, height=self.canvas_height)
         self.frame_id = self.canvas.create_window((4,4), window=self.frame, anchor=N+W,
@@ -218,8 +219,8 @@ class RecipeViewWindow(Frame):
         self.canvas.configure(scrollregion=self.canvas.bbox(ALL))
 
     def onCanvasConfigure(self, event):
-        self.canvas_width = event.width-4
-        self.canvas_height = event.height-4
+        self.canvas_width = ((event.width - 4) if self.manager.is_wind else (event.width - 6))
+        self.canvas_height = ((event.height - 4) if self.manager.is_wind else (event.height - 6))
         self.canvas.configure(width=self.canvas_width, height=self.canvas_height)
         if self.first:
             self.populate()

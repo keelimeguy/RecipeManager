@@ -3,6 +3,8 @@ try:
 except ImportError:
     from tkinter import *
 
+from color_scheme import *
+
 class ModalWindow(object):
 
     def __init__(self, root, title, text):
@@ -12,6 +14,7 @@ class ModalWindow(object):
         self.modalWindow = Toplevel(root)
         self.modalWindow.title(title)
         self.modalWindow.resizable(False, False)
+        self.modalWindow.config(bg=BG_COLOR)
 
         # Setup the widgets in the window
         label = Label(self.modalWindow, text = text, font = '-size 10')
