@@ -30,7 +30,7 @@ class RecipeCreationWindow(Frame):
         self.final = None
 
         self.name_label = Label(self.master, text="Name:", bg=BG_COLOR).grid(row=0, column=0, columnspan=2, sticky=E)
-        self.name_text = Text(self.master, height=1, width=32, highlightbackground='black', bd=1)
+        self.name_text = Text(self.master, height=1, width=32)
         self.name_text.grid(row=0, column=2, columnspan=7, sticky=NSEW)
         self.name_text.bind('<Tab>', self.on_text_tab)
         self.name_text.bind('<Return>', self.on_text_tab)
