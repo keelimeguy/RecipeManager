@@ -5,7 +5,7 @@ except ImportError:
 
 from ..structure.color_scheme import *
 
-version = '0.7.1'
+version = '0.7.2'
 
 class AboutWindow(object):
 

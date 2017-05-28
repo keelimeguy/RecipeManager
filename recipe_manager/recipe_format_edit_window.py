@@ -10,8 +10,9 @@ from structure.insertion_listbox import InsertionListbox
 
 class RecipeFormatEditWindow(object):
 
-    def __init__(self, root, preference_file):
+    def __init__(self, root, manager, preference_file):
         self.root = root
+        self.manager = manager
         self.master = Toplevel(root)
         self.master.title("Edit Recipe Format")
         self.master.resizable(False, False)
@@ -38,8 +39,11 @@ class RecipeFormatEditWindow(object):
     def setup(self):
         current_dir = os.getcwd()
         if not os.path.isfile(os.path.join(current_dir,self.preference_file)):
-            with open(os.path.join(current_dir,self.preference_file),"w") as f:
+            if self.manager.is_wind:
                 self.recipe_format = {"database":os.path.join(current_dir,"recipe_data.db"), "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
+            else:
+                self.recipe_format = {"database":os.path.join(os.path.expanduser("~"),"Documents/recipe_data.db"), "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
+            with open(os.path.join(current_dir,self.preference_file),"r") as f:
                 json.dump(self.recipe_format, f)
         else:
             with open(os.path.join(current_dir,self.preference_file),"r") as f:

@@ -106,7 +106,7 @@ class RecipeManager():
         self.my_gui.wait_window(w.master)
 
     def set_recipe_format(self):
-        w = RecipeFormatEditWindow(self.root, self.preference_file)
+        w = RecipeFormatEditWindow(self.root, self, self.preference_file)
         self.my_gui.wait_window(w.master)
         self.my_gui.destroy()
         self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
@@ -208,7 +208,10 @@ if __name__ == "__main__":
     preference_file = "recipe_manager_preferences.json"
     current_dir = os.getcwd()
     if not os.path.isfile(os.path.join(current_dir,preference_file)):
-        database = os.path.join(current_dir,"recipe_data.db")
+        if __platform__ == "win32":
+            database = os.path.join(current_dir,"recipe_data.db")
+        else:
+            database = os.path.join(os.path.expanduser("~"),"Documents/recipe_data.db")
     else:
         with open(os.path.join(current_dir,preference_file),"r") as f:
             recipe_format = json.load(f)
