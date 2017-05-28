@@ -18,15 +18,17 @@ class IngredientListWindow(Frame):
         Frame.__init__(self, root)
         self.root = root
         self.header = Frame(root, bg=BG_COLOR)
+        self.under_header = Frame(root, bg=BG_COLOR)
+        self.window = Frame(self.under_header, bg=BG_COLOR)
+        self.footer = Frame(self.under_header, bg=BG_COLOR)
         self.header.pack(fill=BOTH)
-        self.window = Frame(root, bg=BG_COLOR)
-        self.window.pack(fill=BOTH, expand=YES)
-        self.footer = Frame(root, bg=BG_COLOR)
-        self.footer.pack(fill=BOTH)
+        self.under_header.pack(fill=BOTH, expand=YES)
+        self.footer.pack(fill=BOTH, side=BOTTOM)
+        self.window.pack(fill=BOTH, expand=YES, side=BOTTOM)
 
-        self.search_button = Button(self.header, text="..", command=self.adv_search)
+        self.search_button = Button(self.header, text="..", command=self.adv_search, highlightbackground=BG_COLOR)
         self.search_button.pack(side=RIGHT)
-        self.search_button = Button(self.header, text="Search", command=self.search_ingredient)
+        self.search_button = Button(self.header, text="Search", command=self.search_ingredient, highlightbackground=BG_COLOR)
         self.search_button.pack(side=RIGHT)
 
         self.search_text = Text(self.header, width=16, height=1)
@@ -37,17 +39,22 @@ class IngredientListWindow(Frame):
         self.manager = manager
         self.database = database
 
-        self.ingredient_list = MultiListbox(self.window, command=self.on_select, height=400, width=400, headerfont=("Times", 11, "bold"))
+        if self.manager.is_wind:
+            self.ingredient_list = MultiListbox(self.window, command=self.on_select, headerfont=("Times", 11, "bold"))
+        else:
+            self.ingredient_list = MultiListbox(self.window, command=self.on_select)
         self.ingredient_list.bind("<Button-1>", self.sort_column_sngl)
         self.ingredient_list.bind("<Double-1>", self.sort_column_dbl)
-        self.ingredient_list.pack(fill=BOTH, expand=YES, side=LEFT)
         self.vsb = Scrollbar(self.window, orient="vertical", command=self.ingredient_list.yview)
         self.ingredient_list.configure(yscrollcommand=self.vsb.set)
         self.hsb = Scrollbar(self.footer, orient="horizontal", command=self.ingredient_list.xview)
         self.ingredient_list.configure(xscrollcommand=self.hsb.set)
-        self.ingredient_list.bind("<MouseWheel>", self.on_mousewheel)
 
-        self.vsb.pack(fill=BOTH, side=LEFT)
+        self.ingredient_list.bind("<Enter>", self._bound_to_mousewheel)
+        self.ingredient_list.bind("<Leave>", self._unbound_to_mousewheel)
+
+        self.vsb.pack(fill=BOTH, side=RIGHT)
+        self.ingredient_list.pack(fill=BOTH, expand=YES, side=RIGHT)
         self.hsb.pack(fill=BOTH)
 
         self.id_list = []
@@ -61,9 +68,18 @@ class IngredientListWindow(Frame):
         else:
             self.populate()
 
+    def _bound_to_mousewheel(self, event):
+        self.master.bind_all("<MouseWheel>", self.on_mousewheel)
+
+    def _unbound_to_mousewheel(self, event):
+        self.master.unbind_all("<MouseWheel>")
+
     def on_mousewheel(self, event):
-        self.ingredient_list.yview_scroll(-1*(event.delta/120), "units") # Windows
-        # self.ingredient_list.yview_scroll(-1*(event.delta), "units") # OS X
+        if self.manager.is_wind:
+            self.ingredient_list.yview_scroll(-1*(event.delta/120), "units")
+        else:
+            self.ingredient_list.yview_scroll(-1*(event.delta), "units")
+        return 'break'
 
     def on_select(self, event):
         if event>=0:
@@ -101,6 +117,7 @@ class IngredientListWindow(Frame):
 
     def destroy(self):
         self.header.destroy()
+        self.under_header.destroy()
         self.window.destroy()
         self.footer.destroy()
 

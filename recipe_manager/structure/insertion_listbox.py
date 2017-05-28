@@ -12,9 +12,9 @@ class InsertionListbox(DragDropListbox):
         self.listbox_unused = Listbox(self.master)
         self.listbox_unused.grid(row = 1, column = 0, rowspan=6, sticky=EW)
 
-        self.add_button = Button(self.master, text=">", command=self.add)
+        self.add_button = Button(self.master, text=">", command=self.add, highlightbackground=BG_COLOR)
         self.add_button.grid(row=3, column=1, columnspan=2, sticky=NS)
-        self.remove_button = Button(self.master, text="<", command=self.remove)
+        self.remove_button = Button(self.master, text="<", command=self.remove, highlightbackground=BG_COLOR)
         self.remove_button.grid(row=4, column=1, columnspan=2, sticky=NS)
 
         if reorder:

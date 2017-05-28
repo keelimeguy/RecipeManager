@@ -19,32 +19,32 @@ class SearchWindow(Frame):
         self.final = None
 
         self.name_label = Label(self.master, text="Find {} with..".format(objects), bg=BG_COLOR).grid(row=0, column=0, columnspan=2, sticky=E)
-
-        self.all_label = Label(self.master, text="All of these terms:", bg=BG_COLOR).grid(row=1, column=0, columnspan=2, sticky=E)
+        Label(self.master, text="", bg=BG_COLOR).grid(row=1, column=0, columnspan=2, sticky=E)
+        self.all_label = Label(self.master, text="All of these terms:", bg=BG_COLOR).grid(row=2, column=0, columnspan=2, sticky=E)
         self.all_text = Text(self.master, undo=True, height=1, width=32)
-        self.all_text.grid(row=1, column=3, columnspan=3, sticky=EW)
+        self.all_text.grid(row=2, column=3, columnspan=3, sticky=EW)
         self.all_text.bind('<Tab>', self.on_text_tab)
         self.all_text.bind('<Return>', self.search)
-
-        self.any_label = Label(self.master, text="Any of these terms:", bg=BG_COLOR).grid(row=2, column=0, columnspan=2, sticky=E)
+        Label(self.master, text="", bg=BG_COLOR).grid(row=3, column=0, columnspan=2, sticky=E)
+        self.any_label = Label(self.master, text="Any of these terms:", bg=BG_COLOR).grid(row=4, column=0, columnspan=2, sticky=E)
         self.any_text = Text(self.master, undo=True, height=1, width=32)
-        self.any_text.grid(row=2, column=3, columnspan=3, sticky=EW)
+        self.any_text.grid(row=4, column=3, columnspan=3, sticky=EW)
         self.any_text.bind('<Tab>', self.on_text_tab)
         self.any_text.bind('<Return>', self.search)
-
-        self.none_label = Label(self.master, text="None of these terms:", bg=BG_COLOR).grid(row=3, column=0, columnspan=2, sticky=E)
+        Label(self.master, text="", bg=BG_COLOR).grid(row=5, column=0, columnspan=2, sticky=E)
+        self.none_label = Label(self.master, text="None of these terms:", bg=BG_COLOR).grid(row=6, column=0, columnspan=2, sticky=E)
         self.none_text = Text(self.master, undo=True, height=1, width=32)
-        self.none_text.grid(row=3, column=3, columnspan=3, sticky=EW)
+        self.none_text.grid(row=6, column=3, columnspan=3, sticky=EW)
         self.none_text.bind('<Tab>', self.on_text_tab)
         self.none_text.bind('<Return>', self.search)
 
-        Label(self.master, text="", bg=BG_COLOR).grid(row=4, column=6)
+        Label(self.master, text="", bg=BG_COLOR).grid(row=7, column=6)
 
-        self.save_button = Button(self.master, text="Search", command=self.search)
-        self.save_button.grid(row=5, column=4, sticky=EW)
+        self.save_button = Button(self.master, text="Search", command=self.search, highlightbackground=BG_COLOR)
+        self.save_button.grid(row=8, column=4, sticky=EW)
 
-        self.save_button = Button(self.master, text="Cancel", command=self.master.destroy)
-        self.save_button.grid(row=5, column=5, sticky=EW)
+        self.save_button = Button(self.master, text="Cancel", command=self.master.destroy, highlightbackground=BG_COLOR)
+        self.save_button.grid(row=8, column=5, sticky=EW)
 
     def _focusNext(self, widget):
         '''Return the next widget in tab order'''

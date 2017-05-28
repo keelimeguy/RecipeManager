@@ -17,13 +17,13 @@ class ModalWindow(object):
         self.modalWindow.config(bg=BG_COLOR)
 
         # Setup the widgets in the window
-        label = Label(self.modalWindow, text = text, font = '-size 10')
+        label = Label(self.modalWindow, text = text, font = '-size 10', bg=BG_COLOR)
         label.grid(row = 0, column = 0, columnspan = 2, padx = 2, pady = 2)
 
-        but = Button(self.modalWindow, text = 'Yes', command = self.choiceYes)
+        but = Button(self.modalWindow, text = 'Yes', command = self.choiceYes, highlightbackground=BG_COLOR)
         but.grid(row = 1, column = 0, sticky = 'nsew', padx = 2, pady = 5)
 
-        but = Button(self.modalWindow, text = 'No', command = self.choiceNo)
+        but = Button(self.modalWindow, text = 'No', command = self.choiceNo, highlightbackground=BG_COLOR)
         but.grid(row = 1, column = 1, sticky = 'nsew', padx = 2, pady = 5)
 
         self.modalWindow.rowconfigure(1, minsize = 40)

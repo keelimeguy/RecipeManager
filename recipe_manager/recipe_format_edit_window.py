@@ -26,9 +26,9 @@ class RecipeFormatEditWindow(object):
         self.listbox = InsertionListbox(self.master, True)
         self.listbox.grid(row = 1, column = 0, columnspan = 4)
 
-        self.done_button = Button(self.master, text="Done", command=self.format)
+        self.done_button = Button(self.master, text="Done", command=self.format, highlightbackground=BG_COLOR)
         self.done_button.grid(row=2, column=1, sticky=E)
-        self.cancel_button = Button(self.master, text="Cancel", command=self.master.destroy)
+        self.cancel_button = Button(self.master, text="Cancel", command=self.master.destroy, highlightbackground=BG_COLOR)
         self.cancel_button.grid(row=2, column=2, sticky=W)
 
         self.master.grab_set()

@@ -13,9 +13,10 @@ from structure.drag_drop_listbox import DragDropListbox
 from structure.color_scheme import *
 
 class RecipeCreationWindow(Frame):
-    def __init__(self, master, database, root, recipe=None):
+    def __init__(self, master, manager, database, root, recipe=None):
         Frame.__init__(self, master)
         self.root = root
+        self.manager = manager
         self.master.resizable(False, False)
         self.master.title("Create Recipe")
         self.master.grid_rowconfigure(1, weight=1)
@@ -23,6 +24,7 @@ class RecipeCreationWindow(Frame):
         self.master.config(bg=BG_COLOR)
 
         self.selected = False
+        self.entered_widget = None
         self.database = database
         self.old_id = None
         self.final = None
@@ -64,6 +66,10 @@ class RecipeCreationWindow(Frame):
         self.desc_text.config(yscrollcommand=self.desc_scrollbar.set)
         self.desc_scrollbar.config(command=self.desc_text.yview)
 
+        self.desc_text.bind("<Enter>", self._bound_desc_to_mousewheel)
+        self.desc_text.bind("<Leave>", self._unbound_desc_to_mousewheel)
+        self.desc_text.bind("<MouseWheel>", self._null_mousewheel)
+
         self.ingr_label = Label(self.master, text="Ingredients:", bg=BG_COLOR).grid(row=7, column=0, columnspan=2, sticky=E)
         self.ingr_scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.ingr_scrollbar.grid(row=8, column=12, columnspan=1, sticky=W)
@@ -72,8 +78,12 @@ class RecipeCreationWindow(Frame):
         self.ingr_list.config(yscrollcommand=self.ingr_scrollbar.set)
         self.ingr_list.bind('<BackSpace>', self.rem_ingr)
         self.ingr_list.bind('<<ListboxSelect>>', self.on_select)
-        self.ingr_list.bind("<MouseWheel>", self.on_mousewheel)
         self.ingr_scrollbar.config(command=self.ingr_list.yview)
+
+        self.ingr_list.bind("<Enter>", self._bound_ingr_to_mousewheel)
+        self.ingr_list.bind("<Leave>", self._unbound_ingr_to_mousewheel)
+        self.ingr_list.bind("<MouseWheel>", self._null_mousewheel)
+
         self.ingr_amount = Text(self.master, height=1, width=4)
         self.ingr_amount.insert(END, "<#>")
         self.ingr_amount.grid(row=9, column=2, sticky=E)
@@ -92,8 +102,8 @@ class RecipeCreationWindow(Frame):
         self.ingr_text.bind('<Tab>', self.on_text_tab)
         self.ingr_text.bind('<Return>', self.on_text_tab)
         self.ingr_text.bind("<FocusIn>", self.on_select)
-        self.ingr_add_button = Button(self.master, text="+", command=self.add_ingr).grid(row=9, column=11, sticky=EW)
-        self.ingr_add_button = Button(self.master, text="-", command=self.rem_ingr).grid(row=9, column=12, sticky=EW)
+        self.ingr_add_button = Button(self.master, text="+", command=self.add_ingr, highlightbackground=BG_COLOR).grid(row=9, column=11, sticky=EW)
+        self.ingr_add_button = Button(self.master, text="-", command=self.rem_ingr, highlightbackground=BG_COLOR).grid(row=9, column=12, sticky=EW)
         self.ingr_dict = {}
 
         self.inst_label = Label(self.master, text="Instructions:", bg=BG_COLOR).grid(row=10, column=0, columnspan=2, sticky=E)
@@ -105,6 +115,10 @@ class RecipeCreationWindow(Frame):
         self.inst_text.bind('<Tab>', self.on_text_tab)
         self.inst_scrollbar.config(command=self.inst_text.yview)
 
+        self.inst_text.bind("<Enter>", self._bound_inst_to_mousewheel)
+        self.inst_text.bind("<Leave>", self._unbound_inst_to_mousewheel)
+        self.inst_text.bind("<MouseWheel>", self._null_mousewheel)
+
         self.note_label = Label(self.master, text="Notes:", bg=BG_COLOR).grid(row=12, column=0, columnspan=2, sticky=E)
         self.note_scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.note_scrollbar.grid(row=13, column=12, columnspan=1, sticky=W)
@@ -114,11 +128,15 @@ class RecipeCreationWindow(Frame):
         self.note_text.bind('<Tab>', self.on_text_tab)
         self.note_scrollbar.config(command=self.note_text.yview)
 
+        self.note_text.bind("<Enter>", self._bound_note_to_mousewheel)
+        self.note_text.bind("<Leave>", self._unbound_note_to_mousewheel)
+        self.note_text.bind("<MouseWheel>", self._null_mousewheel)
+
         Label(self.master, text="", bg=BG_COLOR).grid(row=14, column=0)
 
-        self.save_button = Button(self.master, text="Save", command=self.save_recipe)
+        self.save_button = Button(self.master, text="Save", command=self.save_recipe, highlightbackground=BG_COLOR)
         self.save_button.grid(row=15, column=2, columnspan=9, sticky=EW)
-        self.back_button = Button(self.master, text="Back", command=self.master.destroy)
+        self.back_button = Button(self.master, text="Back", command=self.master.destroy, highlightbackground=BG_COLOR)
         self.back_button.grid(row=15, column=11, columnspan=2, sticky=EW)
 
         if recipe:
@@ -133,9 +151,77 @@ class RecipeCreationWindow(Frame):
                 self.ingr_list.insert(END, (i[0], i[1] if i[1]!=None else "", i[2]))
                 self.ingr_dict[i[2]] = i[0]
 
-    def on_mousewheel(self, event):
-        self.ingr_list.yview_scroll(-1*(event.delta/120), "units") # Windows
-        # self.recipe_list.yview_scroll(-1*(event.delta), "units") # OS X
+    def _null_mousewheel(self, event):
+        if event.widget!=self.entered_widget:
+            if self.entered_widget == self.desc_text:
+                self.on_mousewheel_desc(event)
+            elif self.entered_widget == self.ingr_list:
+                self.on_mousewheel_ingr(event)
+            elif self.entered_widget == self.inst_text:
+                self.on_mousewheel_inst(event)
+            elif self.entered_widget == self.note_text:
+                self.on_mousewheel_note(event)
+            return 'break'
+
+    def _bound_desc_to_mousewheel(self, event):
+        self.master.bind_all("<MouseWheel>", self.on_mousewheel_desc)
+        self.entered_widget = event.widget
+
+    def _unbound_desc_to_mousewheel(self, event):
+        self.master.unbind_all("<MouseWheel>")
+        self.entered_widget = None
+
+    def on_mousewheel_desc(self, event):
+        if self.manager.is_wind:
+            self.desc_text.yview_scroll(-1*(event.delta/120), "units")
+        else:
+            self.desc_text.yview_scroll(-1*(event.delta), "units")
+        return 'break'
+
+    def _bound_ingr_to_mousewheel(self, event):
+        self.master.bind_all("<MouseWheel>", self.on_mousewheel_ingr)
+        self.entered_widget = event.widget
+
+    def _unbound_ingr_to_mousewheel(self, event):
+        self.master.unbind_all("<MouseWheel>")
+        self.entered_widget = None
+
+    def on_mousewheel_ingr(self, event):
+        if self.manager.is_wind:
+            self.ingr_list.yview_scroll(-1*(event.delta/120), "units")
+        else:
+            self.ingr_list.yview_scroll(-1*(event.delta), "units")
+        return 'break'
+
+    def _bound_inst_to_mousewheel(self, event):
+        self.master.bind_all("<MouseWheel>", self.on_mousewheel_inst)
+        self.entered_widget = event.widget
+
+    def _unbound_inst_to_mousewheel(self, event):
+        self.master.unbind_all("<MouseWheel>")
+        self.entered_widget = None
+
+    def on_mousewheel_inst(self, event):
+        if self.manager.is_wind:
+            self.inst_text.yview_scroll(-1*(event.delta/120), "units")
+        else:
+            self.inst_text.yview_scroll(-1*(event.delta), "units")
+        return 'break'
+
+    def _bound_note_to_mousewheel(self, event):
+        self.master.bind_all("<MouseWheel>", self.on_mousewheel_note)
+        self.entered_widget = event.widget
+
+    def _unbound_note_to_mousewheel(self, event):
+        self.master.unbind_all("<MouseWheel>")
+        self.entered_widget = None
+
+    def on_mousewheel_note(self, event):
+        if self.manager.is_wind:
+            self.note_text.yview_scroll(-1*(event.delta/120), "units")
+        else:
+            self.note_text.yview_scroll(-1*(event.delta), "units")
+        return 'break'
 
     def _focusNext(self, widget):
         '''Return the next widget in tab order'''

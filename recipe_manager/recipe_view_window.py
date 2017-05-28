@@ -45,17 +45,17 @@ class RecipeViewWindow(Frame):
         self.header.grid_rowconfigure(5, weight=1)
         self.header.grid_columnconfigure(5, weight=1)
 
-        self.button_left = Button(self.header, text="<", command=self.shift_left)
-        self.button_right = Button(self.header, text=">", command=self.shift_right)
+        self.button_left = Button(self.header, text="<", command=self.shift_left, highlightbackground=BG_COLOR)
+        self.button_right = Button(self.header, text=">", command=self.shift_right, highlightbackground=BG_COLOR)
         self.button_left.grid(row=0, column=0, sticky=W)
         self.button_right.grid(row=0, column=5, sticky=E)
-        self.button_remove = Button(self.header, text="Remove Recipe", command=self.remove_recipe)
+        self.button_remove = Button(self.header, text="Remove Recipe", command=self.remove_recipe, highlightbackground=BG_COLOR)
         self.button_remove.grid(row=0, column=1, sticky=E)
-        self.button_edit = Button(self.header, text="Edit Recipe", command=self.edit_recipe)
+        self.button_edit = Button(self.header, text="Edit Recipe", command=self.edit_recipe, highlightbackground=BG_COLOR)
         self.button_edit.grid(row=0, column=2, sticky=EW)
-        self.button_edit = Button(self.header, text="Refresh", command=self.populate)
+        self.button_edit = Button(self.header, text="Refresh", command=self.populate, highlightbackground=BG_COLOR)
         self.button_edit.grid(row=0, column=3, sticky=EW)
-        self.button_browse = Button(self.header, text="Back to Browse", command=self.browse_recipe)
+        self.button_browse = Button(self.header, text="Back to Browse", command=self.browse_recipe, highlightbackground=BG_COLOR)
         self.button_browse.grid(row=0, column=4, sticky=W)
 
         self.database = database
@@ -125,8 +125,11 @@ class RecipeViewWindow(Frame):
         self.unbind_all("<MouseWheel>")
 
     def on_mousewheel(self, event):
-        self.canvas.yview_scroll(-1*(event.delta/120), "units") # Windows
-        # self.canvas.yview_scroll(-1*(event.delta), "units") # OS X
+        if self.manager.is_wind:
+            self.canvas.yview_scroll(-1*(event.delta/120), "units")
+        else:
+            self.canvas.yview_scroll(-1*(event.delta), "units")
+        return 'break'
 
     def destroy(self):
         self.root.unbind("<Left>")
@@ -235,20 +238,16 @@ class RecipeViewWindow(Frame):
         self.populate()
 
     def shift_up(self, event=None):
-        shift_delta = 1
-        self.canvas.yview_scroll(-1*(shift_delta), "units") # Windows
-        # self.canvas.yview_scroll(-1*(shift_delta*120), "units") # OS X
+        self.canvas.yview_scroll(-1, "units")
 
     def shift_down(self, event=None):
-        shift_delta = 1
-        self.canvas.yview_scroll(shift_delta, "units") # Windows
-        # self.canvas.yview_scroll(shift_delta*120, "units") # OS X
+        self.canvas.yview_scroll(1, "units")
 
     def edit_recipe(self):
         book = RecipeBook(self.database)
         recipe, r_id, self.index = book.select_recipe(self.index, self.id_list)
         book.close()
-        w = RecipeCreationWindow(Toplevel(self), self.database, self.root, recipe)
+        w = RecipeCreationWindow(Toplevel(self), self.manager, self.database, self.root, recipe)
         w.master.focus()
         self.wait_window(w.master)
         if w.final != None:

@@ -99,7 +99,7 @@ class RecipeManager():
         self.my_gui = RecipeViewWindow(self.root, self.database, self, self.preference_file, index, id_list, search)
 
     def docs(self):
-        DocumentationWindow(self.root)
+        DocumentationWindow(self.root, self)
 
     def about(self):
         w = AboutWindow(self.root)
