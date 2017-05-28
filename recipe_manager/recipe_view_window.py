@@ -94,8 +94,8 @@ class RecipeViewWindow(Frame):
         self.ingr_label_list = []
         row = 5
         self.ingr_label_list.append((Label(self.frame, text="Amount", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=80),
-            Label(self.frame, text="Unit", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8),
-            Label(self.frame, text="Ingredient", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8)))
+            Label(self.frame, text="Unit", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=135),
+            Label(self.frame, text="Ingredient", bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=135)))
         self.ingr_label_list[0][0].grid(row=row, column=0, sticky=W+N)
         self.ingr_label_list[0][1].grid(row=row, column=1, sticky=W+N)
         self.ingr_label_list[0][2].grid(row=row, column=2, columnspan=2, sticky=W+N)
@@ -189,8 +189,8 @@ class RecipeViewWindow(Frame):
             else:
                 val = i[0]
             self.ingr_label_list.append((Label(self.frame, text=(val if val else str(amount[0])), bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=80),
-                Label(self.frame, text=i[1], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8),
-                Label(self.frame, text=i[2], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=self.canvas_width*3/8)))
+                Label(self.frame, text=i[1], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=135),
+                Label(self.frame, text=i[2], bg="white", font=("Times", 10, ""), justify=LEFT, wraplength=135)))
             self.ingr_label_list[row-5][0].grid(row=row, column=0, sticky=W+N)
             self.ingr_label_list[row-5][1].grid(row=row, column=1, sticky=W+N)
             self.ingr_label_list[row-5][2].grid(row=row, column=2, columnspan=2, sticky=W+N)
