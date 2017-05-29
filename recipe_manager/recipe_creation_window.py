@@ -149,7 +149,7 @@ class RecipeCreationWindow(Frame):
             self.cook_text.insert(END, recipe[0][7])
             for i in sorted(recipe[1], key=lambda tup: tup[3]):
                 self.ingr_list.insert(END, (i[0], i[1] if i[1]!=None else "", i[2]))
-                self.ingr_dict[i[2]] = i[0]
+                self.ingr_dict[i[2]] = (i[0], i[1] if i[1]!=None else "")
 
     def _null_mousewheel(self, event):
         if event.widget!=self.entered_widget:
@@ -269,7 +269,7 @@ class RecipeCreationWindow(Frame):
         self.ingr_text.config(bg="white")
         try:
             str_amount = self.ingr_amount.get("1.0", END).strip()
-            if str_amount == "-":
+            if str_amount == "-" or str_amount == "":
                 str_amount = "0"
             else:
                 for frac in [(.5, " 1/2"), (.25, " 1/4"), (.125, " 1/8"), (.333, " 1/3"), (.75, " 3/4"), (.0625, " 1/16"), (.666, " 2/3")]:
@@ -287,11 +287,18 @@ class RecipeCreationWindow(Frame):
         name = self.ingr_text.get("1.0", END).strip()
         if name in self.ingr_dict or len(name)==0:
             self.ingr_text.config(bg="red")
+            if name in self.ingr_dict:
+                index = self.ingr_list.get(0, "end").index((self.ingr_dict[name][0], self.ingr_dict[name][1], name))
+                self.ingr_list.selection_clear(0, "end")
+                self.ingr_list.selection_set(index)
+                self.ingr_list.activate(index)
+                self.ingr_list.see(index)
             self.ingr_text.focus()
             return
 
-        self.ingr_dict[name] = amount
-        self.ingr_list.insert(END, (amount, self.ingr_unit.get("1.0", END).strip(), name))
+        unit = self.ingr_unit.get("1.0", END).strip()
+        self.ingr_dict[name] = (amount, unit)
+        self.ingr_list.insert(END, (amount, unit, name))
         self.ingr_text.delete("1.0", END)
         self.ingr_amount.delete("1.0", END)
         self.ingr_unit.delete("1.0", END)

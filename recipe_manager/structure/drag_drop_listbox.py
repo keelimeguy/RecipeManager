@@ -17,20 +17,24 @@ class DragDropListbox(Listbox):
         self.curIndex = self.nearest(event.y)
 
     def shiftSelection(self, event):
-        i = self.nearest(event.y)
-        if self.fix_first and (i == 0 or self.curIndex == 0):
+        self.selection_clear(0, "end")
+        if self.fix_first and self.curIndex == 0:
             return
+        i = self.nearest(event.y)
+        if self.fix_first and i == 0:
+            i = 1
         if i < self.curIndex:
             while i < self.curIndex:
-                x = self.get(i)
-                self.delete(i)
-                i+=1
-                self.insert(i, x)
-            self.curIndex = i-1
+                x = self.get(self.curIndex)
+                self.delete(self.curIndex)
+                self.curIndex-=1
+                self.insert(self.curIndex, x)
+                self.activate(self.curIndex)
         elif i > self.curIndex:
             while i > self.curIndex:
-                x = self.get(i)
-                self.delete(i)
-                i-=1
-                self.insert(i, x)
-            self.curIndex = i+1
+                x = self.get(self.curIndex)
+                self.delete(self.curIndex)
+                self.curIndex+=1
+                self.insert(self.curIndex, x)
+                self.activate(self.curIndex)
+        self.selection_set(self.curIndex)
