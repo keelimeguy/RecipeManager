@@ -51,7 +51,7 @@ class RecipeFormatEditWindow(object):
                     if self.recipe_format["name"]!=1:
                         raise ValueError("Key \"name\" must have value \"1\" in {}".format(self.preference_file))
         for k, v in sorted(self.recipe_format.iteritems(), key=lambda (k,v): (v,k)):
-            if not k in ["database"]:
+            if not k in ["database", "tips_index", "seed", "show_tips"]:
                 if v > 0:
                     self.listbox.insert(END, k.replace(' ', '').replace('_', ' ').title())
                 else:

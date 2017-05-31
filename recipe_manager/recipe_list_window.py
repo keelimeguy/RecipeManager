@@ -135,13 +135,20 @@ class RecipeListWindow(Frame):
             else:
                 self.recipe_format = {"database":os.path.join(os.path.expanduser("~"),"Documents/recipe_data.db"), "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
             with open(os.path.join(current_dir,self.preference_file),"w") as f:
-	        json.dump(self.recipe_format, f)
+	           json.dump(self.recipe_format, f)
         else:
             with open(os.path.join(current_dir,self.preference_file),"r") as f:
                 self.recipe_format = json.load(f)
                 if self.recipe_format["name"]!=1:
                     raise ValueError("Key \"name\" must have value \"1\" in {}".format(self.preference_file))
-        del self.recipe_format["database"]
+        if self.recipe_format.get("database", None) != None:
+            del self.recipe_format["database"]
+        if self.recipe_format.get("tips_index", None) != None:
+            del self.recipe_format["tips_index"]
+        if self.recipe_format.get("seed", None) != None:
+            del self.recipe_format["seed"]
+        if self.recipe_format.get("show_tips", None != None):
+            del self.recipe_format["show_tips"]
 
     def populate(self, search=None, grouped=True):
         self.load_json()

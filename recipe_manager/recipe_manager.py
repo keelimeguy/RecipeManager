@@ -22,6 +22,7 @@ if __debug__:
     from ingredient_list_window import IngredientListWindow
     from docs.documentation_window import DocumentationWindow
     from docs.about_window import AboutWindow
+    from docs.tip_window import TipWindow
     from recipe_format_edit_window import RecipeFormatEditWindow
 else:
     from recipe_manager.data.recipe_book import RecipeBook
@@ -31,10 +32,11 @@ else:
     from recipe_manager.ingredient_list_window import IngredientListWindow
     from recipe_manager.docs.documentation_window import DocumentationWindow
     from recipe_manager.docs.about_window import AboutWindow
+    from recipe_manager.docs.tip_window import TipWindow
     from recipe_manager.recipe_format_edit_window import RecipeFormatEditWindow
 
 class RecipeManager():
-    def __init__(self, root, database, preference_file):
+    def __init__(self, root, database, preference_file, show_tips):
         self.is_wind = (__platform__ == "win32")
         self.root = root
         self.root.title("Recipe Manager")
@@ -44,7 +46,7 @@ class RecipeManager():
 
         self.menubar = Menu(self.root)
 
-        self.fileoptions = { 'defaultextension':".db",
+        self.fileoptions = {'defaultextension':".db",
                             'filetypes':[('database files', '.db'), ('all files', '.*')],
                             'initialfile':self.database,
                             'parent':self.root,
@@ -61,6 +63,7 @@ class RecipeManager():
         self.settings_menu = Menu(self.menubar, tearoff=0)
         self.settings_menu.add_command(label="Edit Default Database", command=self.set_database_pref)
         self.settings_menu.add_command(label="Edit Listed Recipe Format", command=self.set_recipe_format)
+        self.settings_menu.add_command(label="Enable/Disable Startup Tips", command=self.set_startup_tips)
         self.menubar.add_cascade(label="Preferences", menu=self.settings_menu)
 
         self.lists_menu = Menu(self.menubar, tearoff=0)
@@ -76,7 +79,9 @@ class RecipeManager():
         self.root.config(menu=self.menubar)
 
         self.my_gui = RecipeListWindow(self.root, self.database, self, self.preference_file)
-        self.my_gui.focus()
+        if show_tips:
+            self.tip()
+        self.root.focus_force()
         root.mainloop()
 
     def fresh_browse(self):
@@ -103,6 +108,10 @@ class RecipeManager():
 
     def about(self):
         w = AboutWindow(self.root)
+        self.my_gui.wait_window(w.master)
+
+    def tip(self):
+        w = TipWindow(self.my_gui, self.preference_file)
         self.my_gui.wait_window(w.master)
 
     def set_recipe_format(self):
@@ -180,6 +189,28 @@ class RecipeManager():
         dest.renumber()
         dest.close(True)
 
+    def set_startup_tips(self):
+        d = ModalWindow(self.my_gui, "Change Startup Tips", "Do you want to see tips at startup?")
+        self.my_gui.wait_window(d.modalWindow)
+        if d.choice == 'Yes':
+            show_tips = True
+        elif d.choice == 'No':
+            show_tips = False
+        else:
+            return
+        current_dir = os.getcwd()
+        if not os.path.isfile(os.path.join(current_dir,self.preference_file)):
+            with open(os.path.join(current_dir,self.preference_file),"w") as f:
+                recipe_format = {"database":filename, "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4, "tips_index": (0,0)}
+                recipe_format["show_tips"]=show_tips
+                json.dump(recipe_format, f)
+        else:
+            with open(os.path.join(current_dir,self.preference_file),"r") as f:
+                recipe_format = json.load(f)
+                recipe_format["show_tips"]=show_tips
+            with open(os.path.join(current_dir,self.preference_file),"w") as f:
+                json.dump(recipe_format, f)
+
     def set_database_pref(self):
         fileoptions = { 'defaultextension':".db",
                         'filetypes':[('database files', '.db'), ('all files', '.*')],
@@ -189,7 +220,7 @@ class RecipeManager():
         filename = tkFileDialog.askopenfilename(**fileoptions)
 
         if filename:
-            d = ModalWindow(self.my_gui, "Confirmation", "Warning: In the future, if the file at the given location cannot be found at startup\nthe program will automatically create the file at that position.\nIs this okay? Choosing 'No' cancels the change in preferences.")
+            d = ModalWindow(self.my_gui, "Confirmation", "Warning: In the future, if the file at the given location cannot be found at startup\nthe preferences will return to the default file location.\nDo you want to change the startup database preferences now?")
             self.my_gui.wait_window(d.modalWindow)
             if d.choice == 'Yes':
                 current_dir = os.getcwd()
@@ -207,6 +238,7 @@ class RecipeManager():
 if __name__ == "__main__":
     preference_file = "recipe_manager_preferences.json"
     current_dir = os.getcwd()
+    show_tips = True
     if not os.path.isfile(os.path.join(current_dir,preference_file)):
         if __platform__ == "win32":
             database = os.path.join(current_dir,"recipe_data.db")
@@ -215,11 +247,20 @@ if __name__ == "__main__":
     else:
         with open(os.path.join(current_dir,preference_file),"r") as f:
             recipe_format = json.load(f)
-            database = recipe_format["database"]
+            database = recipe_format.get("database", None)
+            show_tips = recipe_format.get("show_tips", True)
+        if not database or not os.path.isfile(database):
+            if __platform__ == "win32":
+                database = os.path.join(current_dir,"recipe_data.db")
+            else:
+                database = os.path.join(os.path.expanduser("~"),"Documents/recipe_data.db")
+            with open(os.path.join(current_dir,preference_file),"w") as f:
+                recipe_format["database"]=database
+                json.dump(recipe_format, f)
 
     book = RecipeBook(database)
     book.renumber()
     book.close(True)
 
     root = Tk()
-    manager = RecipeManager(root, database, preference_file)
+    manager = RecipeManager(root, database, preference_file, show_tips)
