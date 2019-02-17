@@ -8,9 +8,9 @@ if __debug__:
     from data.recipe_book import RecipeBook
 else:
     from recipe_manager.data.recipe_book import RecipeBook
-from structure.modal_window import ModalWindow
-from structure.drag_drop_listbox import DragDropListbox
-from structure.color_scheme import *
+from .structure.modal_window import ModalWindow
+from .structure.drag_drop_listbox import DragDropListbox
+from .structure.color_scheme import *
 
 class RecipeCreationWindow(Frame):
     def __init__(self, master, manager, database, root, recipe=None):

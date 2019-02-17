@@ -72,7 +72,8 @@ class TipWindow(object):
                                 next_line = [line.strip()]
                             lines.append(next_line)
         else:
-            path = os.path.join(sys._MEIPASS, "docs")
+            # path = os.path.join(sys._MEIPASS, "docs")
+            path = os.path.join(os.getcwd(), "text")
             if os.path.isfile(os.path.join(path, "tips.txt")):
                 with open(os.path.join(path, "tips.txt"), 'r') as f:
                     for line in f:

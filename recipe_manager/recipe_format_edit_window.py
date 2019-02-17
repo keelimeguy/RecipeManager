@@ -5,8 +5,8 @@ except ImportError:
 import os
 import json
 
-from structure.color_scheme import *
-from structure.insertion_listbox import InsertionListbox
+from .structure.color_scheme import *
+from .structure.insertion_listbox import InsertionListbox
 
 class RecipeFormatEditWindow(object):
 
@@ -50,7 +50,7 @@ class RecipeFormatEditWindow(object):
                     self.recipe_format = json.load(f)
                     if self.recipe_format["name"]!=1:
                         raise ValueError("Key \"name\" must have value \"1\" in {}".format(self.preference_file))
-        for k, v in sorted(self.recipe_format.iteritems(), key=lambda (k,v): (v,k)):
+        for k, v in sorted(self.recipe_format.items(), key=lambda x: (0,x[0]) if (isinstance(x[1], list) or isinstance(x[1], str)) else (x[1],x[0])):
             if not k in ["database", "tips_index", "seed", "show_tips"]:
                 if v > 0:
                     self.listbox.insert(END, k.replace(' ', '').replace('_', ' ').title())

@@ -3,7 +3,7 @@ try:
 except ImportError:
     from tkinter import *
 
-from color_scheme import *
+from .color_scheme import *
 
 class ModalWindow(object):
 

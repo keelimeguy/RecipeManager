@@ -92,7 +92,8 @@ class DocumentationWindow(object):
                 with open(os.path.join(docs_dir, option[1]), 'r') as myfile:
                     data = myfile.read()
         else:
-            path = os.path.join(sys._MEIPASS, "docs")
+            # path = os.path.join(sys._MEIPASS, "docs")
+            path = os.path.join(os.getcwd(), "text")
             if os.path.isfile(os.path.join(path, option[1])):
                 with open(os.path.join(path, option[1]), 'r') as myfile:
                     data = myfile.read()

@@ -5,6 +5,7 @@ try:
     import tkFileDialog
 except ImportError:
     from tkinter import *
+    import tkinter.filedialog as tkFileDialog
 from sys import platform as __platform__
 import json
 import os

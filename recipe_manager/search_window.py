@@ -3,7 +3,7 @@ try:
 except ImportError:
     from tkinter import *
 
-from structure.color_scheme import *
+from .structure.color_scheme import *
 
 class SearchWindow(Frame):
     def __init__(self, master, root, type=None, objects="objects"):

@@ -3,8 +3,8 @@ try:
 except ImportError:
     from tkinter import *
 
-from drag_drop_listbox import DragDropListbox
-from color_scheme import *
+from .drag_drop_listbox import DragDropListbox
+from .color_scheme import *
 
 class InsertionListbox(DragDropListbox):
     def __init__(self, master, fix_first=False, reorder=True, **kw):

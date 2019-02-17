@@ -9,8 +9,8 @@ if __debug__:
 else:
     from recipe_manager.data.recipe_book import RecipeBook
     from recipe_manager.structure.modal_window import ModalWindow
-from recipe_creation_window import RecipeCreationWindow
-from structure.color_scheme import *
+from .recipe_creation_window import RecipeCreationWindow
+from .structure.color_scheme import *
 
 class RecipeViewWindow(Frame):
     def __init__(self, root, database, manager, preferences, index=0, id_list=None, search=None):

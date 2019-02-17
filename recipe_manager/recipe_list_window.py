@@ -12,8 +12,8 @@ if __debug__:
 else:
     from recipe_manager.data.recipe_book import RecipeBook
     from recipe_manager.recipe_creation_window import RecipeCreationWindow
-from structure.color_scheme import *
-from search_window import SearchWindow
+from .structure.color_scheme import *
+from .search_window import SearchWindow
 
 class RecipeListWindow(Frame):
     def __init__(self, root, database, manager, preference_file, search=None):
@@ -135,7 +135,7 @@ class RecipeListWindow(Frame):
             else:
                 self.recipe_format = {"database":os.path.join(os.path.expanduser("~"),"Documents/recipe_data.db"), "name": 1, "description": 0, "instructions": 0, "yield": 2, "notes": 5, "prep_time": 3, "cook_time": 4}
             with open(os.path.join(current_dir,self.preference_file),"w") as f:
-	           json.dump(self.recipe_format, f)
+                json.dump(self.recipe_format, f)
         else:
             with open(os.path.join(current_dir,self.preference_file),"r") as f:
                 self.recipe_format = json.load(f)
@@ -156,7 +156,7 @@ class RecipeListWindow(Frame):
         book = RecipeBook(self.database)
         formatting = []
         columns = []
-        for k, v in sorted(self.recipe_format.iteritems(), key=lambda (k,v): (v,k)):
+        for k, v in sorted(self.recipe_format.items(), key=lambda x: (x[1],x[0])):
             if v > 0:
                 formatting.append("r."+k.replace(' ', ''))
                 columns.append(k.replace(' ', '').replace('_', ' ').title())

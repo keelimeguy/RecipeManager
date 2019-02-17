@@ -10,8 +10,8 @@ if __debug__:
     from data.recipe_book import RecipeBook
 else:
     from recipe_manager.data.recipe_book import RecipeBook
-from structure.color_scheme import *
-from search_window import SearchWindow
+from .structure.color_scheme import *
+from .search_window import SearchWindow
 
 class IngredientListWindow(Frame):
     def __init__(self, root, database, manager, search=None):
